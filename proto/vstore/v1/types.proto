@@ -1,0 +1,32 @@
+syntax = "proto3";
+package vstore.v1;
+
+option go_package = "vstore/v1";
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "cometbft/crypto/v1/keys.proto";
+
+// Transaction represents a transportable data payload.
+// Transactions always contain a signer and a signature.
+message Transaction {
+  // Contains the signer public key and its type (32+1 bytes)
+  cometbft.crypto.v1.PublicKey signer = 1 [
+    (gogoproto.nullable) = false
+  ];
+
+  // Contains the signature of body (64 bytes)
+  bytes signature = 2;
+
+  // Contains the transaction hash (32 bytes)
+  bytes hash = 3;
+
+  // Contains the transaction timestamp
+  google.protobuf.Timestamp time = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime)  = true
+  ];
+
+  // Contains the transaction body (arbitrary length)
+  bytes body = 5;
+}

@@ -1,0 +1,14 @@
+version: v1
+name: buf.build/vstore/vfs
+deps:
+  - buf.build/cosmos/gogo-proto
+  - buf.build/cometbft/cometbft
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
+    - COMMENTS
+    - FILE_LOWER_SNAKE_CASE
+  enum_zero_value_suffix: _UNKNOWN
