@@ -72,14 +72,11 @@ func (p SignedTransaction) PublicKey() string {
 	return strings.ToUpper(hex.EncodeToString(p.Signer))
 }
 
-// Bytes returns a byte slice built from the transaction hash,
-// the unsigned data bytes and the signature.
+// Bytes returns a byte slice built from the size-prefixed
+// data and the signature.
 func (p SignedTransaction) Bytes() []byte {
-	// Transaction hash used as an index in storage
-	proto := p.Hash[:]
-
 	// Get the size-prefixed unsigned bytes of data
-	proto = append(proto, p.Data.Bytes()...)
+	proto := p.Data.Bytes()
 
 	// Each data set is suffixed by its signature (64 bytes)
 	payload := append(proto, p.Sig...)

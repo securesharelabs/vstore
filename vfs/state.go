@@ -62,6 +62,10 @@ func (s State) MerkleRoots() [][]byte {
 // The produced hash can be used to verify the integrity of the State.
 // This function is used as the "AppHash"
 func (s State) Hash() []byte {
+	if len(s.merkleRoots) == 0 {
+		return make([]byte, 32)
+	}
+
 	// Compute merkle root of all committed transactions
 	return merkle.HashFromByteSlices(s.MerkleRoots())
 }
