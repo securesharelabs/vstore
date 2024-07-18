@@ -27,6 +27,9 @@ message Transaction {
     (gogoproto.stdtime)  = true
   ];
 
+  // Contains the size of body ("Size" is reserved)
+  uint32 len = 5;
+
   // Contains the transaction body (arbitrary length)
-  bytes body = 5;
+  bytes body = 6;
 }
