@@ -1,14 +1,15 @@
 package vfs
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	vfsp2p "vstore/api/vstore/v1"
+
+	"github.com/cosmos/gogoproto/proto"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/crypto/ed25519"
@@ -26,21 +27,15 @@ func TestVStoreCommitAndQuery(t *testing.T) {
 	vstore := NewInMemoryVStoreApplication()
 
 	data := []byte(testSimpleValue)
-	pub, sig, err := makeSignature(ownerPrivs[0], data)
-	require.NoError(t, err, "should sign simple value with ed25519 private key")
-
-	// signature information: pubkey || sig
-	si := append(pub, sig...)
-
-	// data input: siginfo || data
-	tx := append(si, data...)
+	stx, err := makeTransaction(t, ownerPrivs[0], data)
+	require.NoError(t, err, "should create a signed transaction")
 
 	// CheckTx, PrepareProposal, FinalizeBlock, Commit
-	response := testVStoreCommitTx(ctx, t, vstore, tx)
+	response := testVStoreCommitTx(ctx, t, vstore, stx.Bytes())
 
 	// Query
 	// data output: size || data || sig
-	testVStoreQuery(ctx, t, vstore, pub, testSimpleValue, sig, response.TxResults)
+	testVStoreQuery(ctx, t, vstore, testSimpleValue, stx, response.TxResults)
 }
 
 func TestVStoreSigners(t *testing.T) {
@@ -52,17 +47,11 @@ func TestVStoreSigners(t *testing.T) {
 
 	data := []byte(testSimpleValue)
 	for i := 0; i < int(numSigners); i++ {
-		pub, sig, err := makeSignature(ownerPrivs[i], data)
-		require.NoError(t, err, "should sign simple value with ed25519 private key")
+		stx, err := makeTransaction(t, ownerPrivs[i], data)
+		require.NoError(t, err, "should create a signed transaction")
 
-		// signature information: pubkey || sig
-		si := append(pub, sig...)
-
-		// data input: siginfo || data
-		tx := append(si, data...)
-
-		response := testVStoreCommitTx(ctx, t, vstore, tx)
-		testVStoreQuery(ctx, t, vstore, pub, testSimpleValue, sig, response.TxResults)
+		response := testVStoreCommitTx(ctx, t, vstore, stx.Bytes())
+		testVStoreQuery(ctx, t, vstore, testSimpleValue, stx, response.TxResults)
 	}
 
 	assert.NotEmpty(t, vstore.state.NumTransactions)
@@ -93,15 +82,10 @@ func TestVStoreEmptyTxs(t *testing.T) {
 			data = []byte("") // second tx is empty
 		}
 
-		pub, sig, err := makeSignature(ownerPrivs[i], data)
-		require.NoError(t, err, "should sign data with ed25519 private key")
+		stx, err := makeTransaction(t, ownerPrivs[i], data)
+		require.NoError(t, err, "should create a signed transaction")
 
-		// signature information: pubkey || sig
-		si := append(pub, sig...)
-
-		// data input: siginfo || data
-		tx := append(si, data...)
-		txs[i] = tx
+		txs[i] = stx.Bytes()
 	}
 
 	// PrepareProposal
@@ -109,29 +93,6 @@ func TestVStoreEmptyTxs(t *testing.T) {
 	resPrepare, err := vstore.PrepareProposal(ctx, &reqPrepare)
 	require.NoError(t, err)
 	require.Equal(t, len(reqPrepare.Txs)-1, len(resPrepare.Txs), "Empty transaction not properly removed")
-}
-
-func TestVStoreMissingSigInfo(t *testing.T) {
-	_, cancel, ownerPrivs := ResetTestRoot(t, 1)
-	defer cancel()
-
-	data := []byte(testSimpleValue)
-	pub, sig, err := makeSignature(ownerPrivs[0], data)
-	require.NoError(t, err, "should sign simple value with ed25519 private key")
-
-	// data input: siginfo || data
-	tx_missingPub := append(sig, data...)
-	tx_missingSig := append(pub, data...)
-	tx_missingBoth := data[:]
-
-	_, err = NewSignedTransactionFromBytes(tx_missingPub, time.Now())
-	assert.NotNil(t, err, "error should be returned for missing signature info")
-
-	_, err = NewSignedTransactionFromBytes(tx_missingSig, time.Now())
-	assert.NotNil(t, err, "error should be returned for missing signature info")
-
-	_, err = NewSignedTransactionFromBytes(tx_missingBoth, time.Now())
-	assert.NotNil(t, err, "error should be returned for missing signature info")
 }
 
 // --------------------------------------------------------------------------
@@ -172,7 +133,7 @@ func testVStoreCommitTx(
 	assert.Len(t, ppResp.Txs, 1)
 
 	// FinalizeBlock, Commit
-	responseFinalizeBlock := makeBlockCommit(ctx, t, app, 1, ppResp.Txs...)
+	responseFinalizeBlock := makeBlockCommit(ctx, t, app, 1, ppResp.Txs)
 	assert.NotEmpty(t, responseFinalizeBlock.AppHash)
 	assert.NotEmpty(t, responseFinalizeBlock.TxResults)
 
@@ -183,9 +144,8 @@ func testVStoreQuery(
 	ctx context.Context,
 	t *testing.T,
 	app abci.Application,
-	signerPub []byte,
 	value string,
-	sig []byte,
+	signedTx *SignedTransaction,
 	txResults []*abci.ExecTxResult,
 ) {
 	// Info
@@ -204,32 +164,16 @@ func testVStoreQuery(
 	assert.Equal(t, CodeTypeOK, resQuery.Code)
 	assert.Equal(t, txHash, resQuery.Key)
 	assert.EqualValues(t, info.LastBlockHeight, resQuery.Height)
-	assert.Len(t, resQuery.Value, 8+len(value)+ed25519.SignatureSize)
+	assert.NotEmpty(t, resQuery.Value)
 
-	// extract varint size and signature
-	actualValue := string(resQuery.Value[8 : 8+len(value)])
-	actualSig := resQuery.Value[8+len(value):]
-	assert.Equal(t, value, actualValue, "signed payload should contain value")
-	assert.Equal(t, sig, actualSig, "signed payload should contain signature")
+	tx := new(vfsp2p.Transaction)
+	err = proto.Unmarshal(resQuery.Value, tx)
 
-	// also check that the varint size is correct
-	buf := bytes.NewBuffer(resQuery.Value[:8])
-	varintSize, err := binary.ReadVarint(buf)
-	require.NoError(t, err, "should be able to read size as varint")
-	assert.Equal(t, int64(len(value)), varintSize)
-
-	// TODO: Add test for RequestQuery.Prove option
-}
-
-func makeSignature(privKey, data []byte) ([]byte, []byte, error) {
-	priv := ed25519.PrivKey(privKey)
-	pub := priv.PubKey().Bytes()
-	sig, err := priv.Sign([]byte(testSimpleValue))
-	if err != nil {
-		return []byte{}, []byte{}, err
-	}
-
-	return pub, sig, nil
+	assert.NoError(t, err, "should unmarshal transaction from query result")
+	assert.Equal(t, txHash, tx.Hash, "transaction hash must be correct")
+	assert.Equal(t, signedTx.Signature, tx.Signature, "transaction signature must be correct")
+	assert.Equal(t, []byte(value), tx.Body, "transaction body must be correct")
+	assert.Equal(t, len(value), int(tx.Len), "body length must be correct")
 }
 
 func makeBlockCommit(
@@ -237,7 +181,7 @@ func makeBlockCommit(
 	t *testing.T,
 	app abci.Application,
 	heightInt int,
-	txs ...[]byte,
+	txs [][]byte,
 ) *abci.ResponseFinalizeBlock {
 	t.Helper()
 

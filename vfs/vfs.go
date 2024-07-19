@@ -8,7 +8,6 @@ import (
 	cmtdb "github.com/cometbft/cometbft-db"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/crypto/ed25519"
 	"github.com/cometbft/cometbft/crypto/merkle"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cometbft/cometbft/version"
@@ -47,13 +46,14 @@ func NewInMemoryVStoreApplication() *VStoreApplication {
 // contains at least the 32 bytes of the owner pubkey, 64 bytes of the signature
 // and 1 byte of arbitrary data.
 func (app *VStoreApplication) validateTx(tx []byte) uint32 {
-	if len(tx) == 0 {
-		return CodeTypeEmptyDataError
+	// Expects valid marshalled format for vfsp2p.Transaction
+	stx, err := FromBytes(tx)
+	if err != nil {
+		return CodeTypeInvalidFormatError
 	}
 
-	// Expect at least 1 byte of arbitrary data after the owner pubkey and signature
-	if len(tx) < ed25519.PubKeySize+ed25519.SignatureSize+1 {
-		return CodeTypeInvalidFormatError
+	if stx.Size == 0 || len(stx.Data) == 0 {
+		return CodeTypeEmptyDataError
 	}
 
 	return CodeTypeOK
@@ -74,8 +74,8 @@ func (app *VStoreApplication) processFinalizeBlock(
 
 	// Stage the block data
 	for i, tx := range req.Txs {
-		// Extract pubkey (32b), signature (64b) and data
-		payload, err := NewSignedTransactionFromBytes(tx, req.Time)
+		// Extract pubkey (32b), signature (64b), timestamp (8b) and data
+		payload, err := NewSignedTransactionFromBytes(tx)
 		if err != nil {
 			respTxs[i] = &abci.ExecTxResult{
 				Code:   CodeTypeInvalidFormatError,

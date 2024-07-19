@@ -1,9 +1,6 @@
 package vfs
 
 import (
-	"bytes"
-	"encoding/binary"
-
 	"github.com/cometbft/cometbft/crypto/ed25519"
 )
 
@@ -29,42 +26,21 @@ type TransactionBody []byte
 var _ Signable = (*TransactionBody)(nil)
 
 // Sign creates a digital signature of the bytes using the private
-// key and prepends the signer public key and signature to the unsigned
-// data bytes to form a signed data payload.
+// key implementation for ed25519. Only ed25519 compatibility is added
+// for now because of being able to batch verify ed25519 signatures.
 // Sign implements Signable
 func (p TransactionBody) Sign(priv ed25519.PrivKey) ([]byte, error) {
-	bin := make([]byte, 0)
-
 	// Sign data using the private key
-	pubKey := priv.PubKey()
 	sig, err := priv.Sign(p)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	// A signed payload consists of the signer public key,
-	// the signature, a varint size and the unsigned data.
-	buffer := bytes.NewBuffer(bin)
-	buffer.Write(pubKey.Bytes())
-	buffer.Write(sig)
-	buffer.Write(p.Bytes())
-
-	return buffer.Bytes(), nil
+	return sig, nil
 }
 
 // Bytes returns a size-prefixed byte representation of unsigned data.
 // Bytes implements Signable
 func (p TransactionBody) Bytes() []byte {
-	bin := make([]byte, 0)
-
-	// Each data set is prefixed by its size as a varint
-	varSize := make([]byte, 8)
-	binary.PutVarint(varSize, int64(len(p)))
-
-	// Prepare staged data prefixing it by size
-	buffer := bytes.NewBuffer(bin)
-	buffer.Write(varSize)
-	buffer.Write([]byte(p))
-
-	return buffer.Bytes()
+	return []byte(p)
 }
