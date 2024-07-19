@@ -95,6 +95,25 @@ func TestVStoreEmptyTxs(t *testing.T) {
 	require.Equal(t, len(reqPrepare.Txs)-1, len(resPrepare.Txs), "Empty transaction not properly removed")
 }
 
+func TestVStoreInvalidSignature(t *testing.T) {
+	ctx, cancel, ownerPrivs := ResetTestRoot(t, 1)
+	defer cancel()
+
+	vstore := NewInMemoryVStoreApplication()
+
+	data := []byte(testSimpleValue)
+	stx, err := makeTransaction(t, ownerPrivs[0], data)
+	require.NoError(t, err, "should create a signed transaction")
+
+	// Invalidate signature
+	stx.Signature = append(stx.Signature, []byte("1")...)
+
+	// CheckTx
+	checkTxResp, err := vstore.CheckTx(ctx, &abci.RequestCheckTx{Tx: stx.Bytes()})
+	require.NoError(t, err)
+	assert.Equal(t, CodeTypeInvalidSignatureError, checkTxResp.Code)
+}
+
 // --------------------------------------------------------------------------
 // Exported helpers
 
@@ -125,7 +144,7 @@ func testVStoreCommitTx(
 	// CheckTx
 	checkTxResp, err := app.CheckTx(ctx, &abci.RequestCheckTx{Tx: tx})
 	require.NoError(t, err)
-	assert.Equal(t, uint32(0), checkTxResp.Code)
+	assert.Equal(t, CodeTypeOK, checkTxResp.Code)
 
 	// PrepareProposal
 	ppResp, err := app.PrepareProposal(ctx, &abci.RequestPrepareProposal{Txs: [][]byte{tx}})
@@ -148,6 +167,11 @@ func testVStoreQuery(
 	signedTx *SignedTransaction,
 	txResults []*abci.ExecTxResult,
 ) {
+	t.Helper()
+
+	// We don't go further if we don't have results
+	require.Greater(t, len(txResults), 0)
+
 	// Info
 	info, err := app.Info(ctx, &abci.RequestInfo{})
 	require.NoError(t, err)

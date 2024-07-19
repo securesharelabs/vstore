@@ -34,7 +34,7 @@ func TestVStoreTxFromProto(t *testing.T) {
 	assert.Equal(t, []byte("test hash"), stx.Hash)
 	assert.Equal(t, []byte("test signature"), stx.Signature)
 	assert.Len(t, stx.Data, int(pb.Len))
-	assert.Equal(t, pubKey.Bytes(), stx.Signer.Bytes()[2:]) // skips wire type and size
+	assert.Equal(t, pubKey.Bytes(), stx.Signer.Bytes())
 }
 
 func TestVStoreTxFromBytes(t *testing.T) {
@@ -65,12 +65,22 @@ func TestVStoreTxFromBytes(t *testing.T) {
 
 // --------------------------------------------------------------------------
 
-func makeSignature(privKey, data []byte) ([]byte, error) {
+func makeSignature(t *testing.T, privKey, data []byte) ([]byte, error) {
+	t.Helper()
+
 	priv := ed25519.PrivKey(privKey)
 	sig, err := priv.Sign([]byte(testSimpleValue))
 	if err != nil {
 		return []byte{}, err
 	}
+
+	// No data means no signature
+	if len(data) == 0 {
+		return sig, nil
+	}
+
+	verifiable := priv.PubKey().VerifySignature(data, sig)
+	require.Equal(t, true, verifiable)
 
 	return sig, nil
 }
@@ -79,8 +89,9 @@ func makeTransaction(t *testing.T, privKey, data []byte) (*SignedTransaction, er
 	t.Helper()
 
 	priv := ed25519.PrivKey(privKey)
-	sig, err := makeSignature(privKey, data)
+	sig, err := makeSignature(t, privKey, data)
 	require.NoError(t, err, "should sign data with ed25519 private key")
+	require.Len(t, sig, ed25519.SignatureSize)
 
 	tx := new(vfsp2p.Transaction)
 	tx.Signer = getWirePublicKey(priv.PubKey())
@@ -90,7 +101,7 @@ func makeTransaction(t *testing.T, privKey, data []byte) (*SignedTransaction, er
 	tx.Body = data
 
 	stx, err := FromProto(tx)
-	require.NoError(t, err, "should create transaction from protobuf payload")
+	require.NoError(t, err, "should create transaction from protobuf schema")
 	return stx, err
 }
 

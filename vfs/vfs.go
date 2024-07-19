@@ -56,6 +56,10 @@ func (app *VStoreApplication) validateTx(tx []byte) uint32 {
 		return CodeTypeEmptyDataError
 	}
 
+	if !stx.Verify() {
+		return CodeTypeInvalidSignatureError
+	}
+
 	return CodeTypeOK
 }
 

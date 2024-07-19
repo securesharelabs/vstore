@@ -52,6 +52,11 @@ func NewSignedTransactionFromBytes(tx []byte) (*SignedTransaction, error) {
 	return stx, nil
 }
 
+// Verify returns a boolean that determines the validity of a signature.
+func (p SignedTransaction) Verify() bool {
+	return p.Signer.VerifySignature(p.Data, p.Signature)
+}
+
 // PublicKey returns the uppercase hexadecimal representation
 // of the signer public key.
 func (p SignedTransaction) PublicKey() string {
@@ -72,7 +77,6 @@ func (p SignedTransaction) Bytes() []byte {
 
 // ToProto returns a protobuf transaction object.
 func (p SignedTransaction) ToProto() *vfsp2p.Transaction {
-
 	// Make public key transportable
 	pk := cmtp2p.PublicKey{
 		Sum: &cmtp2p.PublicKey_Ed25519{
@@ -80,7 +84,10 @@ func (p SignedTransaction) ToProto() *vfsp2p.Transaction {
 		},
 	}
 
-	//XXX if hash is empty, must compute
+	// Don't create protobuf without hash
+	if len(p.Hash) == 0 {
+		p.Hash = ComputeHash(&p)
+	}
 
 	tx := new(vfsp2p.Transaction)
 	tx.Signer = pk
@@ -122,10 +129,7 @@ func FromProto(pb *vfsp2p.Transaction) (*SignedTransaction, error) {
 		return nil, errors.New("nil Transaction")
 	}
 
-	pkbz, err := pb.Signer.Marshal()
-	if err != nil {
-		return nil, err
-	}
+	pkbz := pb.Signer.GetEd25519()
 
 	tx := new(SignedTransaction)
 	tx.Signer = ed25519.PubKey(pkbz)
