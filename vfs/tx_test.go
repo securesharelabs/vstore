@@ -1,6 +1,7 @@
 package vfs
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -16,8 +17,11 @@ import (
 )
 
 func TestVStoreTxFromProto(t *testing.T) {
-	_, cancel, ownerPrivs := ResetTestRoot(t, 1)
-	defer cancel()
+	_, cancel, ownerPrivs, vfsDir := ResetTestRoot(t, "vstore-tx-from_proto", 1)
+	defer func() {
+		cancel()
+		os.RemoveAll(vfsDir)
+	}()
 
 	pubKey := ed25519.PrivKey(ownerPrivs[0]).PubKey()
 
@@ -38,8 +42,11 @@ func TestVStoreTxFromProto(t *testing.T) {
 }
 
 func TestVStoreTxFromBytes(t *testing.T) {
-	_, cancel, ownerPrivs := ResetTestRoot(t, 1)
-	defer cancel()
+	_, cancel, ownerPrivs, vfsDir := ResetTestRoot(t, "vstore-tx-from_bytes", 1)
+	defer func() {
+		cancel()
+		os.RemoveAll(vfsDir)
+	}()
 
 	pubKey := ed25519.PrivKey(ownerPrivs[0]).PubKey()
 

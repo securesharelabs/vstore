@@ -2,6 +2,8 @@ package vfs
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,10 +23,13 @@ const (
 )
 
 func TestVStoreCommitAndQuery(t *testing.T) {
-	ctx, cancel, ownerPrivs := ResetTestRoot(t, 1)
-	defer cancel()
+	ctx, cancel, ownerPrivs, vfsDir := ResetTestRoot(t, "test-vstore-commit_and_query", 1)
+	defer func() {
+		cancel()
+		os.RemoveAll(vfsDir)
+	}()
 
-	vstore := NewInMemoryVStoreApplication()
+	vstore := NewInMemoryVStoreApplication(filepath.Join(vfsDir, "id"), []byte("testpassword"))
 
 	data := []byte(testSimpleValue)
 	stx, err := makeTransaction(t, ownerPrivs[0], data)
@@ -40,10 +45,13 @@ func TestVStoreCommitAndQuery(t *testing.T) {
 
 func TestVStoreSigners(t *testing.T) {
 	numSigners := uint32(10)
-	ctx, cancel, ownerPrivs := ResetTestRoot(t, numSigners)
-	defer cancel()
+	ctx, cancel, ownerPrivs, vfsDir := ResetTestRoot(t, "test-vstore-signers", numSigners)
+	defer func() {
+		cancel()
+		os.RemoveAll(vfsDir)
+	}()
 
-	vstore := NewInMemoryVStoreApplication()
+	vstore := NewInMemoryVStoreApplication(filepath.Join(vfsDir, "id"), []byte("testpassword"))
 
 	data := []byte(testSimpleValue)
 	for i := 0; i < int(numSigners); i++ {
@@ -61,10 +69,13 @@ func TestVStoreSigners(t *testing.T) {
 
 func TestVStoreEmptyTxs(t *testing.T) {
 	numSigners := uint32(4)
-	ctx, cancel, ownerPrivs := ResetTestRoot(t, numSigners)
-	defer cancel()
+	ctx, cancel, ownerPrivs, vfsDir := ResetTestRoot(t, "test-vstore-empty_txs", numSigners)
+	defer func() {
+		cancel()
+		os.RemoveAll(vfsDir)
+	}()
 
-	vstore := NewInMemoryVStoreApplication()
+	vstore := NewInMemoryVStoreApplication(filepath.Join(vfsDir, "id"), []byte("testpassword"))
 
 	// CheckTx
 	tx := []byte("")
@@ -96,10 +107,13 @@ func TestVStoreEmptyTxs(t *testing.T) {
 }
 
 func TestVStoreInvalidSignature(t *testing.T) {
-	ctx, cancel, ownerPrivs := ResetTestRoot(t, 1)
-	defer cancel()
+	ctx, cancel, ownerPrivs, vfsDir := ResetTestRoot(t, "test-vstore-invalid_signature", 1)
+	defer func() {
+		cancel()
+		os.RemoveAll(vfsDir)
+	}()
 
-	vstore := NewInMemoryVStoreApplication()
+	vstore := NewInMemoryVStoreApplication(filepath.Join(vfsDir, "id"), []byte("testpassword"))
 
 	data := []byte(testSimpleValue)
 	stx, err := makeTransaction(t, ownerPrivs[0], data)
@@ -117,18 +131,33 @@ func TestVStoreInvalidSignature(t *testing.T) {
 // --------------------------------------------------------------------------
 // Exported helpers
 
-func ResetTestRoot(t *testing.T, numSigners uint32) (context.Context, func(), [][]byte) {
+func ResetTestRoot(t *testing.T, testName string, numSigners uint32) (
+	context.Context,
+	func(),
+	[][]byte,
+	string,
+) {
 	t.Helper()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
+	// create a unique, concurrency-safe test directory under os.TempDir()
+	rootDir, err := os.MkdirTemp("", testName)
+	if err != nil {
+		panic(err)
+	}
+
+	// also create a unique identity for this vfs node (for encrypting db)
+	MustGenerateIdentity(filepath.Join(rootDir, "id"), []byte("testpassword"))
+
+	// and generate numSigners random ed25519 private keys (for signing data)
 	ownerPrivs := make([][]byte, numSigners)
 	for i := 0; i < int(numSigners); i++ {
 		ownerPrivs[i] = ed25519.GenPrivKey()
 		require.Len(t, ownerPrivs[i], ed25519.PrivateKeySize)
 	}
 
-	return ctx, cancel, ownerPrivs
+	return ctx, cancel, ownerPrivs, rootDir
 }
 
 // --------------------------------------------------------------------------
