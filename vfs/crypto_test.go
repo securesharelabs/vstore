@@ -132,7 +132,7 @@ func TestVStoreCryptoMustGenerateIdentity(t *testing.T) {
 	// check that identity can be opened/unlocked
 	id := NewIdentity(priv, pw)
 	pbz, err3 := id.Open()
-	pk, err4 := id.PubKey()
+	pk, err4 := id.Identity().PubKey()
 	assert.NoError(t, err3, "should be able to decrypt identity file")
 	assert.NoError(t, err4, "should be able to read public key")
 	assert.Len(t, pbz, 64) // ed25519 private key

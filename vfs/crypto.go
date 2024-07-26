@@ -18,15 +18,30 @@ import (
 )
 
 // SecretProvider describes a provider that returns an AES-256 secret which
-// is used to encrypt a ed25519 private key.
+// is used to encrypt an ed25519 identity (private key).
 type SecretProvider interface {
-	// Bytes returns the raw bytes of a secret provider.
+	// Bytes returns the raw bytes of a secret provider which include the random
+	// salt (8 bytes) used for encryption and the private key (64 bytes)
+	// Note: This function does not decrypt the AES encrypted private key.
 	Bytes() ([]byte, error)
 
-	// Open returns the bytes of the private key (64-bytes).
+	// Open returns the bytes of the private key (64-bytes)
+	// This method shall decrypt the AES encrypted private key.
 	Open() ([]byte, error)
 
-	// Secret returns the 32-bytes secret used for encryption (AES).
+	// Secret returns the 32-bytes secret used for encryption of the private key.
+	// This is the secret used to encrypt the contents of an identity file.
+	Secret() ([]byte, error)
+
+	// Identity returns a ed25519 identity which is used to encrypt the database.
+	Identity() IdentitySecretProvider
+}
+
+// IdentitySecretProvider describes a provider that returns an AES-256 secret
+// which is used to encrypt the database.
+type IdentitySecretProvider interface {
+	// Secret returns the 32-bytes secret used for encryption of data.
+	// This is the secret used to encrypt the contents of the database.
 	Secret() ([]byte, error)
 
 	// PrivKey returns a ed25519 private key instance.
@@ -38,15 +53,23 @@ type SecretProvider interface {
 
 // identityFile is a private structure that describes a password-protected
 // identity file. The identity file is expected to contain a base64-encoded
-// AES-256 ciphertext prepended by an 8-bytes salt.
+// AES-256 ciphertext prepended by an 8-bytes salt. The private key can be
+// accessed only using the Identity() method and SecretIdentity interface.
 // The file must be accessible.
 type identityFile struct {
 	Path string
 	pw   []byte
 }
 
-// Type assertion ensures identityFile can be opened to a ed25519 private key.
+// ed25519Identity is a byte slice that describes a ed25519 private key.
+// Note: Ed25519 private keys contain the compressed public key as well.
+type ed25519Identity []byte
+
+// Type assertion to ensure the struct can be used to decrypt a ed25519 private key.
 var _ SecretProvider = (*identityFile)(nil)
+
+// Type assertion to ensure the struct can be used to create a secret from private key.
+var _ IdentitySecretProvider = (*ed25519Identity)(nil)
 
 // NewIdentity creates a new identityFile instance
 func NewIdentity(file string, pw []byte) *identityFile {
@@ -63,6 +86,9 @@ func NewIdentity(file string, pw []byte) *identityFile {
 		pw:   pw,
 	}
 }
+
+// --------------------------------------------------------------------------
+// identityFile implements SecretProvider
 
 // Bytes opens an identity file and expects it to contain a base64-encoded
 // content which is decoded and returned. The file must be accessible.
@@ -142,26 +168,46 @@ func (id identityFile) Secret() ([]byte, error) {
 	return secret, nil
 }
 
+// Identity returns a ed25519Identity by opening the identity file and using
+// the secret to decrypt the ed25519 private key.
+// Identity implements SecretProvider
+func (id identityFile) Identity() IdentitySecretProvider {
+	bz, err := id.Open()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return ed25519Identity(bz)
+}
+
+// --------------------------------------------------------------------------
+// ed25519Identity implements IdentitySecretProvider
+
+// Secret implements IdentitySecretProvider
+func (id ed25519Identity) Secret() ([]byte, error) {
+	// salt is first 8 bytes of private key
+	salt := []byte(id)[:8]
+
+	// Generate the AES-compatible 32-bytes secret from private key
+	secret, _, err := GenerateSecret([]byte(id), salt)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return secret, nil
+}
+
 // PrivKey opens an identity file and creates a private key instance. It is
 // recommended to clear this private key instance after you have used it.
 // This function always opens and decrypts the identity file to avoid saving
 // the plaintext content - i.e. the private key - in memory (of the instance).
-// PrivKey implements SecretProvider
-func (id identityFile) PrivKey() (ed25519.PrivKey, error) {
-	bz, err := id.Open()
-	if err != nil {
-		return ed25519.PrivKey{}, err
-	}
-
-	defer func() {
-		bz = []byte{}
-	}()
-
-	return ed25519.PrivKey(bz[:]), nil
+// PrivKey implements IdentitySecretProvider
+func (id ed25519Identity) PrivKey() (ed25519.PrivKey, error) {
+	return ed25519.PrivKey([]byte(id)), nil
 }
 
-// PubKey implements SecretProvider
-func (id identityFile) PubKey() (crypto.PubKey, error) {
+// PubKey implements IdentitySecretProvider
+func (id ed25519Identity) PubKey() (crypto.PubKey, error) {
 	priv, err := id.PrivKey()
 	if err != nil {
 		return nil, err

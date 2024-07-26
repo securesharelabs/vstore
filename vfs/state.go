@@ -70,6 +70,9 @@ func (s State) Hash() []byte {
 	return merkle.HashFromByteSlices(s.MerkleRoots())
 }
 
+// TODO: add implementation for Verify()
+// Verify should check the integrity using merkle roots
+
 // --------------------------------------------------------------------------
 
 // prefixKey adds the "vfs:" database key prefix

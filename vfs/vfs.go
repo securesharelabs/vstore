@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 
 	cmtdb "github.com/cometbft/cometbft-db"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/crypto/merkle"
-	"github.com/cometbft/cometbft/libs/log"
+	cmtlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/cometbft/cometbft/version"
 )
 
@@ -25,21 +26,45 @@ type VStoreApplication struct {
 
 	state  State
 	stage  []SignedTransaction
-	logger log.Logger
+	logger cmtlog.Logger
+
+	priv SecretProvider
 }
 
 // NewVStoreApplication creates a vfs application using a DB to load the State
-func NewVStoreApplication(db cmtdb.DB) *VStoreApplication {
+// and an ed25519 identity to encrypt/decrypt database entities.
+func NewVStoreApplication(
+	db cmtdb.DB,
+	id_file string,
+	password []byte,
+) *VStoreApplication {
+
+	// Opens the identity file to read the public key.
+	// This also makes sure that the provided identity is valid.
+	provider := NewIdentity(id_file, password)
+	pubkey, err := provider.Identity().PubKey()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	log.Printf("using identity: %x", pubkey.Bytes())
+
+	// TODO: verify integrity upon loadState
+
 	return &VStoreApplication{
-		logger: log.NewNopLogger(),
+		logger: cmtlog.NewNopLogger(),
 		state:  loadState(db),
+		priv:   provider,
 	}
 }
 
 // NewInMemoryApplication creates a new application from an in memory database.
 // NOTE: the data will not be persisted.
-func NewInMemoryVStoreApplication() *VStoreApplication {
-	return NewVStoreApplication(cmtdb.NewMemDB())
+func NewInMemoryVStoreApplication(
+	id_file string,
+	password []byte,
+) *VStoreApplication {
+	return NewVStoreApplication(cmtdb.NewMemDB(), id_file, password)
 }
 
 // validateTx validates that the bytes slice is not empty, and that the data
@@ -132,6 +157,8 @@ func (app *VStoreApplication) commitMerkleRoots() {
 // commitStateTransactions saves the State to database and
 // resets the stage.
 func (app *VStoreApplication) commitStateTransitions() {
+	// TODO: verify integrity before saveState
+
 	// Save State instance to database
 	saveState(app.state)
 
@@ -266,13 +293,21 @@ func (app *VStoreApplication) FinalizeBlock(
 // Commit is called after FinalizeBlock and after the CometBFT state updates.
 // The vfs application persists the staged data (from FinalizeBlock) in database
 // in a modified key-value store where the key is the tx hash, and where
-// values are individually prefixed with their size as a varint and suffixed
-// with the signature.
+// values describe marshalled protobuf instances of vfsp2p.Transaction.
 // Commit implements abci.Application
 func (app *VStoreApplication) Commit(
 	_ context.Context,
 	commit *abci.RequestCommit,
 ) (*abci.ResponseCommit, error) {
+	// Read the encryption secret
+	secret, err := app.priv.Identity().Secret()
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		secret = []byte{}
+	}()
 
 	// Persist all the staged data in vfs
 	for _, payload := range app.stage {
@@ -284,9 +319,14 @@ func (app *VStoreApplication) Commit(
 			return nil, errors.New("transaction hash already exists")
 		}
 
-		// Persist the size-prefixed data and append signature
-		// TODO: TBI on implementing encryption (minimalistic).
-		err := app.state.db.Set(dbKey, payload.Bytes())
+		// Encrypt the transaction using the node's secret
+		encProto, err := Encrypt(secret, payload.Bytes())
+		if err != nil {
+			return nil, err
+		}
+
+		// Stores an encrypted vfsp2p.Transaction protobuf payload
+		err = app.state.db.Set(dbKey, encProto)
 		if err != nil {
 			return nil, err
 		}
@@ -308,6 +348,16 @@ func (app *VStoreApplication) Query(
 ) (*abci.ResponseQuery, error) {
 	response := &abci.ResponseQuery{}
 
+	// Read the decryption secret
+	secret, err := app.priv.Identity().Secret()
+	if err != nil {
+		return response, err
+	}
+
+	defer func() {
+		secret = []byte{}
+	}()
+
 	data, err := app.state.db.Get(prefixKey(req.Data))
 	if err != nil {
 		return response, err
@@ -323,8 +373,14 @@ func (app *VStoreApplication) Query(
 		response.Index = -1 // TODO make Proof return index
 	}
 
+	// Decrypt the transaction data with the node's secret
+	plainData, err := Decrypt(secret, data)
+	if err != nil {
+		return response, err
+	}
+
 	response.Key = req.Data
-	response.Value = data
+	response.Value = plainData
 	response.Height = app.state.Height
 
 	return response, nil

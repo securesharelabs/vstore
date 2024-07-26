@@ -22,11 +22,12 @@ go install github.com/securesharelabs/vstore@latest
 vstore -vfs-home /tmp/.vfs-home --socket-addr unix://vfs.sock
 ```
 
-You can interact with it using any ABCI client implementation or you can run
-a CometBFT node that connects with this ABCI application:
+You can interact with vfs using any ABCI client implementation or you can run
+a CometBFT node from the same directory that connects with this ABCI application:
 
 ```bash
 export COMETBFT="github.com/cometbft/cometbft/cmd/cometbft@latest"
+go run ${COMETBFT} init --home /tmp/.cometbft-home
 go run ${COMETBFT} node --home /tmp/.cometbft-home --proxy_app=unix://vfs.sock
 ```
 
@@ -34,7 +35,7 @@ Your `vstore` instance is now available through the CometBFT RPC, e.g.:
 
 ```bash
 # Sending a transaction
-curl -s 'localhost:26657/broadcast_tx_commit?tx="OWNER_PUB+SIG+DATA"'
+curl -s 'localhost:26657/broadcast_tx_commit?tx="DATA"'
 
 # Querying the filesystem by tx hash
 curl -s 'localhost:26657/abci_query?data="TX_HASH"'
@@ -48,11 +49,11 @@ package with caution.
 
 ## Licensing
 
-Copyright vfs Authors
+Copyright vStore Authors
 Copyright 2024 SecureShareLabs (https://vfs.zone)
 
-[vfs][vfs] © 2024 by SecureShareLabs is licensed under [CC BY-SA 4.0][license-url].
+[vStore][vfs] © 2024 by SecureShareLabs is licensed under [CC BY-SA 4.0][license-url].
 
 [vfs]: https://vfs.zone
 [spec]: ./docs/spec/README.md
-[license-url]: https://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1
+[license-url]: https://creativecommons.org/licenses/by-sa/4.0/
