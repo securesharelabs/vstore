@@ -10,9 +10,6 @@ import (
 
 	vfsp2p "vstore/api/vstore/v1"
 
-	cmtp2p "github.com/cometbft/cometbft/api/cometbft/crypto/v1"
-	"github.com/cometbft/cometbft/crypto"
-
 	"github.com/cometbft/cometbft/crypto/ed25519"
 )
 
@@ -26,7 +23,7 @@ func TestVStoreTxFromProto(t *testing.T) {
 	pubKey := ed25519.PrivKey(ownerPrivs[0]).PubKey()
 
 	pb := new(vfsp2p.Transaction)
-	pb.Signer = getWirePublicKey(pubKey)
+	pb.Signer = PubKeyToProto(pubKey)
 	pb.Hash = []byte("test hash")
 	pb.Signature = []byte("test signature")
 	pb.Len = uint32(len(testSimpleValue))
@@ -52,7 +49,7 @@ func TestVStoreTxFromBytes(t *testing.T) {
 
 	data := []byte(testSimpleValue)
 	pb := new(vfsp2p.Transaction)
-	pb.Signer = getWirePublicKey(pubKey)
+	pb.Signer = PubKeyToProto(pubKey)
 	pb.Hash = []byte("test hash")
 	pb.Signature = []byte("test signature")
 	pb.Len = uint32(len(data))
@@ -101,7 +98,7 @@ func makeTransaction(t *testing.T, privKey, data []byte) (*SignedTransaction, er
 	require.Len(t, sig, ed25519.SignatureSize)
 
 	tx := new(vfsp2p.Transaction)
-	tx.Signer = getWirePublicKey(priv.PubKey())
+	tx.Signer = PubKeyToProto(priv.PubKey())
 	tx.Signature = sig
 	tx.Time = time.Now()
 	tx.Len = uint32(len(data))
@@ -110,12 +107,4 @@ func makeTransaction(t *testing.T, privKey, data []byte) (*SignedTransaction, er
 	stx, err := FromProto(tx)
 	require.NoError(t, err, "should create transaction from protobuf schema")
 	return stx, err
-}
-
-func getWirePublicKey(pubKey crypto.PubKey) cmtp2p.PublicKey {
-	return cmtp2p.PublicKey{
-		Sum: &cmtp2p.PublicKey_Ed25519{
-			Ed25519: pubKey.Bytes(),
-		},
-	}
 }

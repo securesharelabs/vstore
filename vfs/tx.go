@@ -11,6 +11,7 @@ import (
 	vfsp2p "vstore/api/vstore/v1"
 
 	cmtp2p "github.com/cometbft/cometbft/api/cometbft/crypto/v1"
+	"github.com/cometbft/cometbft/crypto"
 	"github.com/cosmos/gogoproto/proto"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
@@ -47,7 +48,9 @@ func NewSignedTransactionFromBytes(tx []byte) (*SignedTransaction, error) {
 	}
 
 	// Compute SHA256 transaction hash
-	stx.Hash = ComputeHash(stx)
+	if len(stx.Hash) == 0 {
+		stx.Hash = ComputeHash(stx)
+	}
 
 	return stx, nil
 }
@@ -93,7 +96,7 @@ func (p SignedTransaction) ToProto() *vfsp2p.Transaction {
 	tx.Signer = pk
 	tx.Signature = p.Signature
 	tx.Hash = p.Hash
-	tx.Time = time.Unix(0, p.Time.Unix())
+	tx.Time = time.Unix(p.Time.Unix(), 0)
 	tx.Len = uint32(len(p.Data))
 	tx.Body = p.Data
 
@@ -154,4 +157,12 @@ func FromBytes(bz []byte) (*SignedTransaction, error) {
 	}
 
 	return FromProto(tx)
+}
+
+func PubKeyToProto(pubKey crypto.PubKey) cmtp2p.PublicKey {
+	return cmtp2p.PublicKey{
+		Sum: &cmtp2p.PublicKey_Ed25519{
+			Ed25519: pubKey.Bytes(),
+		},
+	}
 }

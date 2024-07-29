@@ -135,8 +135,8 @@ func (app *VStoreApplication) processFinalizeBlock(
 // commitMerkleRoots computes merkle roots per owner public key
 // and stores them in the merkleRoots property.
 func (app *VStoreApplication) commitMerkleRoots() {
-	if len(app.state.merkleRoots) == 0 {
-		app.state.merkleRoots = make(map[string][]byte, 0)
+	if len(app.state.MerkleRoots) == 0 {
+		app.state.MerkleRoots = make(map[string][]byte, 0)
 	}
 
 	for _, payload := range app.stage {
@@ -144,13 +144,13 @@ func (app *VStoreApplication) commitMerkleRoots() {
 		txs := [][]byte{payload.Hash} // merkle root computed with transaction hash
 
 		// Prepend merkle root if it exists
-		if mr, ok := app.state.merkleRoots[pub]; ok {
+		if mr, ok := app.state.MerkleRoots[pub]; ok {
 			txs = append([][]byte{mr}, txs...)
 		}
 
 		// Compute merkle root by owner public key
 		merkleRoot := merkle.HashFromByteSlices(txs)
-		app.state.merkleRoots[pub] = merkleRoot
+		app.state.MerkleRoots[pub] = merkleRoot
 	}
 }
 

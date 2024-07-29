@@ -64,7 +64,7 @@ func TestVStoreSigners(t *testing.T) {
 
 	assert.NotEmpty(t, vstore.state.NumTransactions)
 	assert.Equal(t, int64(numSigners), vstore.state.NumTransactions)
-	assert.Len(t, vstore.state.MerkleRoots(), int(numSigners))
+	assert.Len(t, vstore.state.SortedMerkleRoots(), int(numSigners))
 }
 
 func TestVStoreEmptyTxs(t *testing.T) {

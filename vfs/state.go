@@ -27,19 +27,19 @@ type State struct {
 	// MerkleRoots contains the cryptographic commitments for transactions that
 	// have previously been processed.
 	// This is used for the appHash.
-	merkleRoots map[string][]byte `json:"merkle_roots"`
+	MerkleRoots map[string][]byte `json:"merkle_roots"`
 }
 
 // MerkleRoots returns a slice of merkle roots that is *deterministic* due to
 // keys always being sorted lexicographically.
-func (s State) MerkleRoots() [][]byte {
+func (s State) SortedMerkleRoots() [][]byte {
 	// Sort keys first (deterministic)
-	max := len(s.merkleRoots)
+	max := len(s.MerkleRoots)
 	keys := make([]string, max)
 	roots := make([][]byte, max)
 
 	i := 0
-	for k := range s.merkleRoots {
+	for k := range s.MerkleRoots {
 		keys[i] = k
 		i++
 	}
@@ -49,7 +49,7 @@ func (s State) MerkleRoots() [][]byte {
 
 	// Iterate over *keys* for determinism
 	for j, k := range keys {
-		v := s.merkleRoots[k]
+		v := s.MerkleRoots[k]
 		roots[j] = v
 	}
 
@@ -62,12 +62,12 @@ func (s State) MerkleRoots() [][]byte {
 // The produced hash can be used to verify the integrity of the State.
 // This function is used as the "AppHash"
 func (s State) Hash() []byte {
-	if len(s.merkleRoots) == 0 {
+	if len(s.MerkleRoots) == 0 {
 		return make([]byte, 32)
 	}
 
 	// Compute merkle root of all committed transactions
-	return merkle.HashFromByteSlices(s.MerkleRoots())
+	return merkle.HashFromByteSlices(s.SortedMerkleRoots())
 }
 
 // TODO: add implementation for Verify()

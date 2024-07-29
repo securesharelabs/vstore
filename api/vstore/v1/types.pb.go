@@ -39,7 +39,8 @@ type Transaction struct {
 	Hash []byte `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
 	// Contains the transaction timestamp
 	Time time.Time `protobuf:"bytes,4,opt,name=time,proto3,stdtime" json:"time"`
-	Len  uint32    `protobuf:"varint,5,opt,name=len,proto3" json:"len,omitempty"`
+	// Contains the size of body ("Size" is reserved)
+	Len uint32 `protobuf:"varint,5,opt,name=len,proto3" json:"len,omitempty"`
 	// Contains the transaction body (arbitrary length)
 	Body []byte `protobuf:"bytes,6,opt,name=body,proto3" json:"body,omitempty"`
 }
