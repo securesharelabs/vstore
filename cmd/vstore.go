@@ -32,10 +32,10 @@ var (
 
 		Long: `vStore is a Go application built using Cosmos SDK. It focusses on providing:
 
-	- data integrity: attaching timestamp and signature information to data ; and
-	- data redundancy: running a vstore application on top of CometBFT nodes ; and
-	- data availability: our Go application enables you to make data available ; and
-	- data security: the blockchain is *not* used to store your data!`,
+  - data integrity: attaching timestamp and signature information to data ; and
+  - data redundancy: running a vstore application on top of CometBFT nodes ; and
+  - data availability: our Go application enables you to make data available ; and
+  - data security: the blockchain is *not* used to store your data!`,
 
 		Example: `  vstore
   vstore version

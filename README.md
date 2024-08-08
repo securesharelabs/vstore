@@ -4,7 +4,7 @@
 
 - *data integrity*: attaching timestamp and signature information to data ; and
 - *data redundancy*: running a vstore application on top of CometBFT nodes ; and
-- *data availability*: our Go application enables you to make data available ; and
+- *data availability*: data is available from any supporting CometBFT nodes ; and
 - *data security*: the blockchain is *not* used to store your data!
 
 The **vStore** is released as an ABCI application which commits cryptographic proof
@@ -19,26 +19,30 @@ To start running an instance of `vstore`, execute the following command:
 
 ```bash
 go install github.com/securesharelabs/vstore@latest
-vstore -vfs-home /tmp/.vfs-home --socket-addr unix://vfs.sock
+vstore --home /tmp/.vfs-home --socket unix://vfs.sock
 ```
 
 You can interact with vfs using any ABCI client implementation or you can run
 a CometBFT node from the same directory that connects with this ABCI application:
 
 ```bash
-export COMETBFT="github.com/cometbft/cometbft/cmd/cometbft@latest"
+export COMETBFT="github.com/cometbft/cometbft/cmd/cometbft@v0.38.10"
 go run ${COMETBFT} init --home /tmp/.cometbft-home
-go run ${COMETBFT} node --home /tmp/.cometbft-home --proxy_app=unix://vfs.sock
+go run ${COMETBFT} node --home /tmp/.cometbft-home --proxy_app unix://vfs.sock
 ```
 
-Your `vstore` instance is now available through the CometBFT RPC, e.g.:
+Your `vstore` instance is now available through the CometBFT RPC, and using the
+different subcommands available with vstore, e.g.:
 
 ```bash
 # Sending a transaction
-curl -s 'localhost:26657/broadcast_tx_commit?tx="DATA"'
+vstore factory --home /tmp/.vfs-home --data "Data that will be signed" --commit
 
-# Querying the filesystem by tx hash
-curl -s 'localhost:26657/abci_query?data="TX_HASH"'
+# Querying app info (includes AppHash)
+vstore info --home /tmp/.vfs-home
+
+# Querying a transaction hash (as returned by factory)
+vstore query --home /tmp/.vfs-home --hash TRANSACTION_HASH_HEX
 ```
 
 ## Disclaimer

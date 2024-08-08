@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strconv"
 
 	cmtdb "github.com/cometbft/cometbft-db"
 
@@ -15,7 +16,10 @@ import (
 )
 
 const (
-	AppVersion uint64 = 1
+	AppVersion        uint64 = 1
+	QueryType_Default string = "hash"
+	QueryType_Height  string = "height"
+	QueryType_PubKey  string = "pubkey"
 )
 
 var _ abci.Application = (*VStoreApplication)(nil)
@@ -166,6 +170,112 @@ func (app *VStoreApplication) commitStateTransitions() {
 	app.stage = make([]SignedTransaction, 0)
 }
 
+// commitTransactionHashes indexes transaction hashes by
+// block height and by signer public key.
+func (app *VStoreApplication) commitTransactionHashes() {
+	for _, payload := range app.stage {
+		// Indexes transaction hashes by height
+		app.addTransactionByHeight(payload)
+
+		// Indexes transaction hashes by pubkey
+		app.addTransactionByPubKey(payload)
+	}
+}
+
+// addTransactionByHeight appends the transaction hash to
+// the block height transaction index.
+func (app *VStoreApplication) addTransactionByHeight(tx SignedTransaction) error {
+	txes := [][]byte{}
+
+	// Indexes hashes by height with prefix "vfs:height:block-X"
+	heightStr := strconv.FormatInt(app.state.Height, 10) // base10
+	dbKey_byHeight := prefixKeyWith([]byte(heightStr), vfsPrefixKeyByHeight)
+
+	// Do we have hashes indexed by this height already?
+	data, err := app.state.db.Get(dbKey_byHeight)
+	if err != nil {
+		return err
+	}
+
+	if len(data) > 0 {
+		json.Unmarshal([]byte(data), &txes)
+	}
+
+	// Adds transaction hash by height
+	txes = append(txes, tx.Hash)
+	byHeight, _ := json.Marshal(txes)
+
+	// Stores transaction hash to index
+	err = app.state.db.Set(dbKey_byHeight, byHeight)
+	return err
+}
+
+// addTransactionByPubKey appends the transaction hash to
+// the signer pubkey transaction index.
+func (app *VStoreApplication) addTransactionByPubKey(tx SignedTransaction) error {
+	txes := [][]byte{}
+
+	// Indexes hashes by pubkey with prefix "vfs:pubkey:X"
+	dbKey_byPubKey := prefixKeyWith(tx.Signer.Bytes(), vfsPrefixKeyByPubKey)
+
+	// Do we have hashes indexed by this pubkey already?
+	data, err := app.state.db.Get(dbKey_byPubKey)
+	if err != nil {
+		return err
+	}
+
+	if len(data) > 0 {
+		json.Unmarshal([]byte(data), &txes)
+	}
+
+	// Adds transaction hash by pubkey
+	txes = append(txes, tx.Hash)
+	byPubKey, _ := json.Marshal(txes)
+
+	// Stores transaction hash to index
+	err = app.state.db.Set(dbKey_byPubKey, byPubKey)
+	return err
+}
+
+// readTransactionFromDB fetches a transaction from the database.
+// Given a transaction hash, the transaction content will be decrypted,
+// otherwise the index is read to retrieve the hash and a second query
+// is executed to fetch the transaction content by hash.
+func (app *VStoreApplication) readTransactionFromDB(
+	queryType string,
+	value []byte,
+) ([]byte, error) {
+	var (
+		queryKey []byte = getQueryKey(queryType, value)
+	)
+
+	// Read from the database
+	data, err := app.state.db.Get(queryKey)
+	if len(data) == 0 || err != nil {
+		return []byte{}, err
+	}
+
+	// TODO: Return array of transaction for height/pubkey indexes
+	if queryType != QueryType_Default {
+		return []byte{}, nil
+	}
+
+	// Unlock the decryption secret
+	secret, err := app.priv.Identity().Secret()
+	if err != nil {
+		return []byte{}, nil
+	}
+	defer func() { secret = []byte{} }()
+
+	// Decrypt the transaction data with the node's secret
+	txData, err := Decrypt(secret, data)
+	if err != nil {
+		return []byte{}, nil
+	}
+
+	return txData, nil
+}
+
 // --------------------------------------------------------------------------
 // VStoreApplication implements interface abcitypes.Application
 
@@ -311,7 +421,7 @@ func (app *VStoreApplication) Commit(
 
 	// Persist all the staged data in vfs
 	for _, payload := range app.stage {
-		// Use transaction hash as the key
+		// Use transaction hash as the key (index by hash)
 		dbKey := prefixKey(payload.Hash)
 
 		// Transaction hash must not exist
@@ -332,6 +442,9 @@ func (app *VStoreApplication) Commit(
 		}
 	}
 
+	// Indexes transaction hash by height and signer pubkey
+	app.commitTransactionHashes()
+
 	// Save the State in database with updated merkle roots
 	app.commitStateTransitions()
 
@@ -346,42 +459,53 @@ func (app *VStoreApplication) Query(
 	_ context.Context,
 	req *abci.RequestQuery,
 ) (*abci.ResponseQuery, error) {
-	response := &abci.ResponseQuery{}
+	response := &abci.ResponseQuery{
+		Key:    req.Data,
+		Height: app.state.Height,
+	}
 
-	// Read the decryption secret
-	secret, err := app.priv.Identity().Secret()
+	queryType := getQueryType(req.Path)
+	plainData, err := app.readTransactionFromDB(queryType, req.Data)
 	if err != nil {
 		return response, err
 	}
 
-	defer func() {
-		secret = []byte{}
-	}()
-
-	data, err := app.state.db.Get(prefixKey(req.Data))
-	if err != nil {
-		return response, err
-	}
-
-	if data == nil {
-		response.Log = "does not exist"
-	} else {
-		response.Log = "exists"
-	}
-
+	response.Value = plainData
+	response.Log = "exists"
 	if req.Prove {
 		response.Index = -1 // TODO make Proof return index
 	}
 
-	// Decrypt the transaction data with the node's secret
-	plainData, err := Decrypt(secret, data)
-	if err != nil {
-		return response, err
+	return response, nil
+}
+
+// --------------------------------------------------------------------------
+// Private helpers
+
+// getQueryKey returns a prefixed database key depending of a queryType.
+func getQueryKey(queryType string, value []byte) []byte {
+	switch queryType {
+	case QueryType_Height:
+		return prefixKeyWith(value, vfsPrefixKeyByHeight)
+	case QueryType_PubKey:
+		return prefixKeyWith(value, vfsPrefixKeyByPubKey)
+	default:
+		break
 	}
 
-	response.Key = req.Data
-	response.Value = plainData
-	response.Height = app.state.Height
+	return prefixKey(value)
+}
 
-	return response, nil
+// getQueryType returns the query type depending on a request path.
+func getQueryType(path string) string {
+	switch path {
+	case "/height":
+		return QueryType_Height
+	case "/pubkey":
+		return QueryType_PubKey
+	default:
+		break
+	}
+
+	return QueryType_Default
 }

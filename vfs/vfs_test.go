@@ -40,7 +40,7 @@ func TestVStoreCommitAndQuery(t *testing.T) {
 
 	// Query
 	// data output: size || data || sig
-	testVStoreQuery(ctx, t, vstore, testSimpleValue, stx, response.TxResults)
+	testVStoreQuery(ctx, t, vstore, testSimpleValue, stx, response.TxResults, vstore.state.Height)
 }
 
 func TestVStoreSigners(t *testing.T) {
@@ -59,7 +59,7 @@ func TestVStoreSigners(t *testing.T) {
 		require.NoError(t, err, "should create a signed transaction")
 
 		response := testVStoreCommitTx(ctx, t, vstore, stx.Bytes())
-		testVStoreQuery(ctx, t, vstore, testSimpleValue, stx, response.TxResults)
+		testVStoreQuery(ctx, t, vstore, testSimpleValue, stx, response.TxResults, vstore.state.Height)
 	}
 
 	assert.NotEmpty(t, vstore.state.NumTransactions)
@@ -181,7 +181,7 @@ func testVStoreCommitTx(
 	assert.Len(t, ppResp.Txs, 1)
 
 	// FinalizeBlock, Commit
-	responseFinalizeBlock := makeBlockCommit(ctx, t, app, 1, ppResp.Txs)
+	responseFinalizeBlock, _ := makeBlockCommit(ctx, t, app, 1, ppResp.Txs)
 	assert.NotEmpty(t, responseFinalizeBlock.AppHash)
 	assert.NotEmpty(t, responseFinalizeBlock.TxResults)
 
@@ -195,6 +195,7 @@ func testVStoreQuery(
 	value string,
 	signedTx *SignedTransaction,
 	txResults []*abci.ExecTxResult,
+	blockHeight int64,
 ) {
 	t.Helper()
 
@@ -210,7 +211,7 @@ func testVStoreQuery(
 	// Query
 	txHash := txResults[0].Data
 	resQuery, err := app.Query(ctx, &abci.RequestQuery{
-		Path: "/store",
+		Path: "/hash",
 		Data: txHash,
 	})
 	require.NoError(t, err)
@@ -227,6 +228,8 @@ func testVStoreQuery(
 	assert.Equal(t, signedTx.Signature, tx.Signature, "transaction signature must be correct")
 	assert.Equal(t, []byte(value), tx.Body, "transaction body must be correct")
 	assert.Equal(t, len(value), int(tx.Len), "body length must be correct")
+
+	// TODO: add tests for /height and /signer transaction indexes
 }
 
 func makeBlockCommit(
@@ -235,7 +238,7 @@ func makeBlockCommit(
 	app abci.Application,
 	heightInt int,
 	txs [][]byte,
-) *abci.ResponseFinalizeBlock {
+) (*abci.ResponseFinalizeBlock, *abci.ResponseCommit) {
 	t.Helper()
 
 	// FinalizeBlock
@@ -247,9 +250,9 @@ func makeBlockCommit(
 	require.Len(t, respFinBlock.TxResults, len(txs))
 
 	// Commit
-	_, err = app.Commit(ctx, &abci.RequestCommit{})
+	respCommit, err := app.Commit(ctx, &abci.RequestCommit{})
 	require.NoError(t, err)
 
 	// response contains TxResults and AppHash
-	return respFinBlock
+	return respFinBlock, respCommit
 }

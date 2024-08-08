@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	stateKey     = []byte("vfsState")
-	vfsPrefixKey = []byte("vfs:")
+	stateKey             = []byte("vfsState")
+	vfsPrefixKey         = []byte("vfs:")
+	vfsPrefixKeyByHeight = []byte("vfs:height:block-")
+	vfsPrefixKeyByPubKey = []byte("vfs:pubkey:")
 )
 
 // State describes the vstore application state which consists of a latest
@@ -78,6 +80,11 @@ func (s State) Hash() []byte {
 // prefixKey adds the "vfs:" database key prefix
 func prefixKey(key []byte) []byte {
 	return append(vfsPrefixKey, key...)
+}
+
+// prefixKeyWith adds a custom database key prefix
+func prefixKeyWith(key []byte, keyPrefix []byte) []byte {
+	return append(keyPrefix, key...)
 }
 
 // loadState reads the state key from the database and tries to unmarshal

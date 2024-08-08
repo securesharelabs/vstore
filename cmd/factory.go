@@ -71,7 +71,7 @@ var factoryCmd = &cobra.Command{
 
 		priv, err := id.Identity().PrivKey()
 		if err != nil {
-			log.Fatalf("could not use private key: %v", err)
+			log.Fatalf("could not unlock private key: %v", err)
 		}
 
 		// Ask for data if not provided with --data
@@ -92,6 +92,7 @@ var factoryCmd = &cobra.Command{
 			log.Fatalf("could not sign transaction: %v", err)
 		}
 
+		// Create a protobuf transaction object
 		tx := new(vfsp2p.Transaction)
 		tx.Signer = vfs.PubKeyToProto(priv.PubKey())
 		tx.Signature = sig
@@ -105,6 +106,9 @@ var factoryCmd = &cobra.Command{
 		}
 
 		txbz := stx.Bytes()
+
+		// Compute the transaction hash for future query capacity
+		stxHash := vfs.ComputeHash(stx)
 
 		// In case we don't commit the transaction, print the bytes
 		if !alsoBroadcastTx {
@@ -131,7 +135,7 @@ var factoryCmd = &cobra.Command{
 
 		if response.TxResult.Code == vfs.CodeTypeOK {
 			fmt.Println("Transaction successfully broadcast!")
-			fmt.Printf("Transaction Hash: %x\n", response.Hash)
+			fmt.Printf("Transaction Hash: %x\n", stxHash)
 			fmt.Printf("Committed Height: %d\n", response.Height)
 		} else {
 			fmt.Println("An error occurred trying to broadcast transaction.")
