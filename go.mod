@@ -1,4 +1,4 @@
-module vstore
+module github.com/securesharelabs/vstore
 
 go 1.22.3
 
