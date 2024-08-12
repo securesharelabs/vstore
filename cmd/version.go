@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	vfs "vstore/vfs"
+
+	vfs "github.com/securesharelabs/vstore/vfs"
 
 	"github.com/spf13/cobra"
 )

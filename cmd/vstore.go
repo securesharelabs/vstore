@@ -7,7 +7,8 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
-	vfs "vstore/vfs"
+
+	vfs "github.com/securesharelabs/vstore/vfs"
 
 	"github.com/spf13/cobra"
 
@@ -34,7 +35,7 @@ var (
 
   - data integrity: attaching timestamp and signature information to data ; and
   - data redundancy: running a vstore application on top of CometBFT nodes ; and
-  - data availability: our Go application enables you to make data available ; and
+  - data availability: data is available from any supporting CometBFT nodes ; and
   - data security: the blockchain is *not* used to store your data!`,
 
 		Example: `  vstore
@@ -65,8 +66,6 @@ var (
 			defer teardownDb()
 
 			log.Printf("using database: %s", dbPath)
-
-			// TODO: NewVStoreApplication should use identity to encrypt data
 
 			// Prepare the vfs application
 			app := vfs.NewVStoreApplication(db, idFile, pw)

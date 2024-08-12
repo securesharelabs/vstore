@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	vfsp2p "vstore/api/vstore/v1"
+	vfsp2p "github.com/securesharelabs/vstore/api/vstore/v1"
 
 	cmtp2p "github.com/cometbft/cometbft/api/cometbft/crypto/v1"
 	"github.com/cometbft/cometbft/crypto"

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	vfsp2p "vstore/api/vstore/v1"
-	vfs "vstore/vfs"
+	vfsp2p "github.com/securesharelabs/vstore/api/vstore/v1"
+	vfs "github.com/securesharelabs/vstore/vfs"
 
 	cmtlog "github.com/cometbft/cometbft/libs/log"
 	rpc "github.com/cometbft/cometbft/rpc/client/http"

@@ -39,7 +39,7 @@ func (p TransactionBody) Sign(priv ed25519.PrivKey) ([]byte, error) {
 	return sig, nil
 }
 
-// Bytes returns a size-prefixed byte representation of unsigned data.
+// Bytes returns a byte representation of unsigned data.
 // Bytes implements Signable
 func (p TransactionBody) Bytes() []byte {
 	return []byte(p)

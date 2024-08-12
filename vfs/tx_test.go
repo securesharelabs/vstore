@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	vfsp2p "vstore/api/vstore/v1"
+	vfsp2p "github.com/securesharelabs/vstore/api/vstore/v1"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
 )

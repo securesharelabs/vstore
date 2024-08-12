@@ -45,6 +45,25 @@ vstore info --home /tmp/.vfs-home
 vstore query --home /tmp/.vfs-home --hash TRANSACTION_HASH_HEX
 ```
 
+## Developer notes
+
+This package is released as `github.com/securesharelabs/vstore` and is composed
+of two implementation subpackages:
+
+- `github.com/securesharelabs/vstore/vfs`: A first draft implementation for `vfs`.
+- `github.com/securesharelabs/vstore/cmd`: A CLI for storing data with vStore.
+
+Note that it is probable that the `vfs` subpackage implementation gets extracted
+in later iterations of the project.
+
+You can install dependencies and run the unit test suite using:
+
+```bash
+go get
+go build
+go test github.com/securesharelabs/vstore/vfs -v -count=1
+```
+
 ## Disclaimer
 
 The authors of this package cannot be held responsible for any loss of money or

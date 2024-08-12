@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	vfs "vstore/vfs"
+
+	vfs "github.com/securesharelabs/vstore/vfs"
 
 	cmtlog "github.com/cometbft/cometbft/libs/log"
 	rpc "github.com/cometbft/cometbft/rpc/client/http"

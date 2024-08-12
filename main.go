@@ -1,7 +1,7 @@
-package main
+package vstore
 
 import (
-	"vstore/cmd"
+	"github.com/securesharelabs/vstore/cmd"
 )
 
 // vStore is built using cobra: github.com/spf13/cobra
@@ -13,6 +13,8 @@ import (
 // Subcommands:
 // - `vstore factory`: Create digitally signed transactions for vfs nodes.
 // - `vstore version`: Print the version number of your vStore instance.
+// - `vstore info`: Print the current node's vStore information (State).
+// - `vstore query`: Query your vStore instance for transactions.
 func main() {
 	cmd.Execute()
 }

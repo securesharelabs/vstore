@@ -8,11 +8,12 @@ import (
 	"log"
 	"os"
 	"strings"
-	vfs "vstore/vfs"
+
+	vfsp2p "github.com/securesharelabs/vstore/api/vstore/v1"
+	vfs "github.com/securesharelabs/vstore/vfs"
 
 	cmtlog "github.com/cometbft/cometbft/libs/log"
 	rpc "github.com/cometbft/cometbft/rpc/client/http"
-	vfsp2p "vstore/api/vstore/v1"
 
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/spf13/cobra"
