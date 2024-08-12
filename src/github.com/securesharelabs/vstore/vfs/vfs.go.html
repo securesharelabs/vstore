@@ -1,0 +1,580 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/securesharelabs/vstore/vfs/vfs.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/vfs">vfs</a>/<span class="text-muted">vfs.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/vfs">github.com/securesharelabs/vstore/vfs</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package vfs
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;context&#34;
+<span id="L5" class="ln">     5  </span>	&#34;encoding/json&#34;
+<span id="L6" class="ln">     6  </span>	&#34;errors&#34;
+<span id="L7" class="ln">     7  </span>	&#34;log&#34;
+<span id="L8" class="ln">     8  </span>	&#34;strconv&#34;
+<span id="L9" class="ln">     9  </span>
+<span id="L10" class="ln">    10  </span>	cmtdb &#34;github.com/cometbft/cometbft-db&#34;
+<span id="L11" class="ln">    11  </span>
+<span id="L12" class="ln">    12  </span>	abci &#34;github.com/cometbft/cometbft/abci/types&#34;
+<span id="L13" class="ln">    13  </span>	&#34;github.com/cometbft/cometbft/crypto/merkle&#34;
+<span id="L14" class="ln">    14  </span>	cmtlog &#34;github.com/cometbft/cometbft/libs/log&#34;
+<span id="L15" class="ln">    15  </span>	&#34;github.com/cometbft/cometbft/version&#34;
+<span id="L16" class="ln">    16  </span>)
+<span id="L17" class="ln">    17  </span>
+<span id="L18" class="ln">    18  </span>const (
+<span id="L19" class="ln">    19  </span>	AppVersion        uint64 = 1
+<span id="L20" class="ln">    20  </span>	QueryType_Default string = &#34;hash&#34;
+<span id="L21" class="ln">    21  </span>	QueryType_Height  string = &#34;height&#34;
+<span id="L22" class="ln">    22  </span>	QueryType_PubKey  string = &#34;pubkey&#34;
+<span id="L23" class="ln">    23  </span>)
+<span id="L24" class="ln">    24  </span>
+<span id="L25" class="ln">    25  </span>var _ abci.Application = (*VStoreApplication)(nil)
+<span id="L26" class="ln">    26  </span>
+<span id="L27" class="ln">    27  </span><span class="comment">// VStoreApplication describes the vStore ABCI application.</span>
+<span id="L28" class="ln">    28  </span>type VStoreApplication struct {
+<span id="L29" class="ln">    29  </span>	abci.BaseApplication
+<span id="L30" class="ln">    30  </span>
+<span id="L31" class="ln">    31  </span>	state  State
+<span id="L32" class="ln">    32  </span>	stage  []SignedTransaction
+<span id="L33" class="ln">    33  </span>	logger cmtlog.Logger
+<span id="L34" class="ln">    34  </span>
+<span id="L35" class="ln">    35  </span>	priv SecretProvider
+<span id="L36" class="ln">    36  </span>}
+<span id="L37" class="ln">    37  </span>
+<span id="L38" class="ln">    38  </span><span class="comment">// NewVStoreApplication creates a vfs application using a DB to load the State</span>
+<span id="L39" class="ln">    39  </span><span class="comment">// and an ed25519 identity to encrypt/decrypt database entities.</span>
+<span id="L40" class="ln">    40  </span>func NewVStoreApplication(
+<span id="L41" class="ln">    41  </span>	db cmtdb.DB,
+<span id="L42" class="ln">    42  </span>	id_file string,
+<span id="L43" class="ln">    43  </span>	password []byte,
+<span id="L44" class="ln">    44  </span>) *VStoreApplication {
+<span id="L45" class="ln">    45  </span>
+<span id="L46" class="ln">    46  </span>	<span class="comment">// Opens the identity file to read the public key.</span>
+<span id="L47" class="ln">    47  </span>	<span class="comment">// This also makes sure that the provided identity is valid.</span>
+<span id="L48" class="ln">    48  </span>	provider := NewIdentity(id_file, password)
+<span id="L49" class="ln">    49  </span>	pubkey, err := provider.Identity().PubKey()
+<span id="L50" class="ln">    50  </span>	if err != nil {
+<span id="L51" class="ln">    51  </span>		panic(err.Error())
+<span id="L52" class="ln">    52  </span>	}
+<span id="L53" class="ln">    53  </span>
+<span id="L54" class="ln">    54  </span>	log.Printf(&#34;using identity: %x&#34;, pubkey.Bytes())
+<span id="L55" class="ln">    55  </span>
+<span id="L56" class="ln">    56  </span>	<span class="comment">// TODO: verify integrity upon loadState</span>
+<span id="L57" class="ln">    57  </span>
+<span id="L58" class="ln">    58  </span>	return &amp;VStoreApplication{
+<span id="L59" class="ln">    59  </span>		logger: cmtlog.NewNopLogger(),
+<span id="L60" class="ln">    60  </span>		state:  loadState(db),
+<span id="L61" class="ln">    61  </span>		priv:   provider,
+<span id="L62" class="ln">    62  </span>	}
+<span id="L63" class="ln">    63  </span>}
+<span id="L64" class="ln">    64  </span>
+<span id="L65" class="ln">    65  </span><span class="comment">// NewInMemoryApplication creates a new application from an in memory database.</span>
+<span id="L66" class="ln">    66  </span><span class="comment">// NOTE: the data will not be persisted.</span>
+<span id="L67" class="ln">    67  </span>func NewInMemoryVStoreApplication(
+<span id="L68" class="ln">    68  </span>	id_file string,
+<span id="L69" class="ln">    69  </span>	password []byte,
+<span id="L70" class="ln">    70  </span>) *VStoreApplication {
+<span id="L71" class="ln">    71  </span>	return NewVStoreApplication(cmtdb.NewMemDB(), id_file, password)
+<span id="L72" class="ln">    72  </span>}
+<span id="L73" class="ln">    73  </span>
+<span id="L74" class="ln">    74  </span><span class="comment">// validateTx validates that the bytes slice is not empty, and that the data</span>
+<span id="L75" class="ln">    75  </span><span class="comment">// contains at least the 32 bytes of the owner pubkey, 64 bytes of the signature</span>
+<span id="L76" class="ln">    76  </span><span class="comment">// and 1 byte of arbitrary data.</span>
+<span id="L77" class="ln">    77  </span>func (app *VStoreApplication) validateTx(tx []byte) uint32 {
+<span id="L78" class="ln">    78  </span>	<span class="comment">// Expects valid marshalled format for vfsp2p.Transaction</span>
+<span id="L79" class="ln">    79  </span>	stx, err := FromBytes(tx)
+<span id="L80" class="ln">    80  </span>	if err != nil {
+<span id="L81" class="ln">    81  </span>		return CodeTypeInvalidFormatError
+<span id="L82" class="ln">    82  </span>	}
+<span id="L83" class="ln">    83  </span>
+<span id="L84" class="ln">    84  </span>	if stx.Size == 0 || len(stx.Data) == 0 {
+<span id="L85" class="ln">    85  </span>		return CodeTypeEmptyDataError
+<span id="L86" class="ln">    86  </span>	}
+<span id="L87" class="ln">    87  </span>
+<span id="L88" class="ln">    88  </span>	if !stx.Verify() {
+<span id="L89" class="ln">    89  </span>		return CodeTypeInvalidSignatureError
+<span id="L90" class="ln">    90  </span>	}
+<span id="L91" class="ln">    91  </span>
+<span id="L92" class="ln">    92  </span>	return CodeTypeOK
+<span id="L93" class="ln">    93  </span>}
+<span id="L94" class="ln">    94  </span>
+<span id="L95" class="ln">    95  </span><span class="comment">// processFinalizeBlock processes a slice of transactions from the request,</span>
+<span id="L96" class="ln">    96  </span><span class="comment">// the creates signed data payloads and updates the Height and NumTransactions</span>
+<span id="L97" class="ln">    97  </span><span class="comment">// as specified in the request.</span>
+<span id="L98" class="ln">    98  </span><span class="comment">// An error code will be returned for invalid transactions.</span>
+<span id="L99" class="ln">    99  </span>func (app *VStoreApplication) processFinalizeBlock(
+<span id="L100" class="ln">   100  </span>	_ context.Context,
+<span id="L101" class="ln">   101  </span>	req *abci.RequestFinalizeBlock,
+<span id="L102" class="ln">   102  </span>) []*abci.ExecTxResult {
+<span id="L103" class="ln">   103  </span>	respTxs := make([]*abci.ExecTxResult, len(req.Txs))
+<span id="L104" class="ln">   104  </span>
+<span id="L105" class="ln">   105  </span>	<span class="comment">// Reset stages</span>
+<span id="L106" class="ln">   106  </span>	app.stage = make([]SignedTransaction, 0)
+<span id="L107" class="ln">   107  </span>
+<span id="L108" class="ln">   108  </span>	<span class="comment">// Stage the block data</span>
+<span id="L109" class="ln">   109  </span>	for i, tx := range req.Txs {
+<span id="L110" class="ln">   110  </span>		<span class="comment">// Extract pubkey (32b), signature (64b), timestamp (8b) and data</span>
+<span id="L111" class="ln">   111  </span>		payload, err := NewSignedTransactionFromBytes(tx)
+<span id="L112" class="ln">   112  </span>		if err != nil {
+<span id="L113" class="ln">   113  </span>			respTxs[i] = &amp;abci.ExecTxResult{
+<span id="L114" class="ln">   114  </span>				Code:   CodeTypeInvalidFormatError,
+<span id="L115" class="ln">   115  </span>				Data:   payload.Hash,
+<span id="L116" class="ln">   116  </span>				Events: []abci.Event{},
+<span id="L117" class="ln">   117  </span>			}
+<span id="L118" class="ln">   118  </span>
+<span id="L119" class="ln">   119  </span>			<span class="comment">// This transaction won&#39;t be staged!</span>
+<span id="L120" class="ln">   120  </span>			continue
+<span id="L121" class="ln">   121  </span>		}
+<span id="L122" class="ln">   122  </span>
+<span id="L123" class="ln">   123  </span>		<span class="comment">// Stage this transaction</span>
+<span id="L124" class="ln">   124  </span>		app.stage = append(app.stage, *payload)
+<span id="L125" class="ln">   125  </span>
+<span id="L126" class="ln">   126  </span>		respTxs[i] = &amp;abci.ExecTxResult{
+<span id="L127" class="ln">   127  </span>			Code:   CodeTypeOK,
+<span id="L128" class="ln">   128  </span>			Data:   payload.Hash,
+<span id="L129" class="ln">   129  </span>			Events: []abci.Event{},
+<span id="L130" class="ln">   130  </span>		}
+<span id="L131" class="ln">   131  </span>
+<span id="L132" class="ln">   132  </span>		app.state.NumTransactions++
+<span id="L133" class="ln">   133  </span>	}
+<span id="L134" class="ln">   134  </span>
+<span id="L135" class="ln">   135  </span>	app.state.Height = req.Height
+<span id="L136" class="ln">   136  </span>	return respTxs
+<span id="L137" class="ln">   137  </span>}
+<span id="L138" class="ln">   138  </span>
+<span id="L139" class="ln">   139  </span><span class="comment">// commitMerkleRoots computes merkle roots per owner public key</span>
+<span id="L140" class="ln">   140  </span><span class="comment">// and stores them in the merkleRoots property.</span>
+<span id="L141" class="ln">   141  </span>func (app *VStoreApplication) commitMerkleRoots() {
+<span id="L142" class="ln">   142  </span>	if len(app.state.MerkleRoots) == 0 {
+<span id="L143" class="ln">   143  </span>		app.state.MerkleRoots = make(map[string][]byte, 0)
+<span id="L144" class="ln">   144  </span>	}
+<span id="L145" class="ln">   145  </span>
+<span id="L146" class="ln">   146  </span>	for _, payload := range app.stage {
+<span id="L147" class="ln">   147  </span>		pub := payload.PublicKey()
+<span id="L148" class="ln">   148  </span>		txs := [][]byte{payload.Hash} <span class="comment">// merkle root computed with transaction hash</span>
+<span id="L149" class="ln">   149  </span>
+<span id="L150" class="ln">   150  </span>		<span class="comment">// Prepend merkle root if it exists</span>
+<span id="L151" class="ln">   151  </span>		if mr, ok := app.state.MerkleRoots[pub]; ok {
+<span id="L152" class="ln">   152  </span>			txs = append([][]byte{mr}, txs...)
+<span id="L153" class="ln">   153  </span>		}
+<span id="L154" class="ln">   154  </span>
+<span id="L155" class="ln">   155  </span>		<span class="comment">// Compute merkle root by owner public key</span>
+<span id="L156" class="ln">   156  </span>		merkleRoot := merkle.HashFromByteSlices(txs)
+<span id="L157" class="ln">   157  </span>		app.state.MerkleRoots[pub] = merkleRoot
+<span id="L158" class="ln">   158  </span>	}
+<span id="L159" class="ln">   159  </span>}
+<span id="L160" class="ln">   160  </span>
+<span id="L161" class="ln">   161  </span><span class="comment">// commitStateTransactions saves the State to database and</span>
+<span id="L162" class="ln">   162  </span><span class="comment">// resets the stage.</span>
+<span id="L163" class="ln">   163  </span>func (app *VStoreApplication) commitStateTransitions() {
+<span id="L164" class="ln">   164  </span>	<span class="comment">// TODO: verify integrity before saveState</span>
+<span id="L165" class="ln">   165  </span>
+<span id="L166" class="ln">   166  </span>	<span class="comment">// Save State instance to database</span>
+<span id="L167" class="ln">   167  </span>	saveState(app.state)
+<span id="L168" class="ln">   168  </span>
+<span id="L169" class="ln">   169  </span>	<span class="comment">// Reset data stage</span>
+<span id="L170" class="ln">   170  </span>	app.stage = make([]SignedTransaction, 0)
+<span id="L171" class="ln">   171  </span>}
+<span id="L172" class="ln">   172  </span>
+<span id="L173" class="ln">   173  </span><span class="comment">// commitTransactionHashes indexes transaction hashes by</span>
+<span id="L174" class="ln">   174  </span><span class="comment">// block height and by signer public key.</span>
+<span id="L175" class="ln">   175  </span>func (app *VStoreApplication) commitTransactionHashes() {
+<span id="L176" class="ln">   176  </span>	for _, payload := range app.stage {
+<span id="L177" class="ln">   177  </span>		<span class="comment">// Indexes transaction hashes by height</span>
+<span id="L178" class="ln">   178  </span>		app.addTransactionByHeight(payload)
+<span id="L179" class="ln">   179  </span>
+<span id="L180" class="ln">   180  </span>		<span class="comment">// Indexes transaction hashes by pubkey</span>
+<span id="L181" class="ln">   181  </span>		app.addTransactionByPubKey(payload)
+<span id="L182" class="ln">   182  </span>	}
+<span id="L183" class="ln">   183  </span>}
+<span id="L184" class="ln">   184  </span>
+<span id="L185" class="ln">   185  </span><span class="comment">// addTransactionByHeight appends the transaction hash to</span>
+<span id="L186" class="ln">   186  </span><span class="comment">// the block height transaction index.</span>
+<span id="L187" class="ln">   187  </span>func (app *VStoreApplication) addTransactionByHeight(tx SignedTransaction) error {
+<span id="L188" class="ln">   188  </span>	txes := [][]byte{}
+<span id="L189" class="ln">   189  </span>
+<span id="L190" class="ln">   190  </span>	<span class="comment">// Indexes hashes by height with prefix &#34;vfs:height:block-X&#34;</span>
+<span id="L191" class="ln">   191  </span>	heightStr := strconv.FormatInt(app.state.Height, 10) <span class="comment">// base10</span>
+<span id="L192" class="ln">   192  </span>	dbKey_byHeight := prefixKeyWith([]byte(heightStr), vfsPrefixKeyByHeight)
+<span id="L193" class="ln">   193  </span>
+<span id="L194" class="ln">   194  </span>	<span class="comment">// Do we have hashes indexed by this height already?</span>
+<span id="L195" class="ln">   195  </span>	data, err := app.state.db.Get(dbKey_byHeight)
+<span id="L196" class="ln">   196  </span>	if err != nil {
+<span id="L197" class="ln">   197  </span>		return err
+<span id="L198" class="ln">   198  </span>	}
+<span id="L199" class="ln">   199  </span>
+<span id="L200" class="ln">   200  </span>	if len(data) &gt; 0 {
+<span id="L201" class="ln">   201  </span>		json.Unmarshal([]byte(data), &amp;txes)
+<span id="L202" class="ln">   202  </span>	}
+<span id="L203" class="ln">   203  </span>
+<span id="L204" class="ln">   204  </span>	<span class="comment">// Adds transaction hash by height</span>
+<span id="L205" class="ln">   205  </span>	txes = append(txes, tx.Hash)
+<span id="L206" class="ln">   206  </span>	byHeight, _ := json.Marshal(txes)
+<span id="L207" class="ln">   207  </span>
+<span id="L208" class="ln">   208  </span>	<span class="comment">// Stores transaction hash to index</span>
+<span id="L209" class="ln">   209  </span>	err = app.state.db.Set(dbKey_byHeight, byHeight)
+<span id="L210" class="ln">   210  </span>	return err
+<span id="L211" class="ln">   211  </span>}
+<span id="L212" class="ln">   212  </span>
+<span id="L213" class="ln">   213  </span><span class="comment">// addTransactionByPubKey appends the transaction hash to</span>
+<span id="L214" class="ln">   214  </span><span class="comment">// the signer pubkey transaction index.</span>
+<span id="L215" class="ln">   215  </span>func (app *VStoreApplication) addTransactionByPubKey(tx SignedTransaction) error {
+<span id="L216" class="ln">   216  </span>	txes := [][]byte{}
+<span id="L217" class="ln">   217  </span>
+<span id="L218" class="ln">   218  </span>	<span class="comment">// Indexes hashes by pubkey with prefix &#34;vfs:pubkey:X&#34;</span>
+<span id="L219" class="ln">   219  </span>	dbKey_byPubKey := prefixKeyWith(tx.Signer.Bytes(), vfsPrefixKeyByPubKey)
+<span id="L220" class="ln">   220  </span>
+<span id="L221" class="ln">   221  </span>	<span class="comment">// Do we have hashes indexed by this pubkey already?</span>
+<span id="L222" class="ln">   222  </span>	data, err := app.state.db.Get(dbKey_byPubKey)
+<span id="L223" class="ln">   223  </span>	if err != nil {
+<span id="L224" class="ln">   224  </span>		return err
+<span id="L225" class="ln">   225  </span>	}
+<span id="L226" class="ln">   226  </span>
+<span id="L227" class="ln">   227  </span>	if len(data) &gt; 0 {
+<span id="L228" class="ln">   228  </span>		json.Unmarshal([]byte(data), &amp;txes)
+<span id="L229" class="ln">   229  </span>	}
+<span id="L230" class="ln">   230  </span>
+<span id="L231" class="ln">   231  </span>	<span class="comment">// Adds transaction hash by pubkey</span>
+<span id="L232" class="ln">   232  </span>	txes = append(txes, tx.Hash)
+<span id="L233" class="ln">   233  </span>	byPubKey, _ := json.Marshal(txes)
+<span id="L234" class="ln">   234  </span>
+<span id="L235" class="ln">   235  </span>	<span class="comment">// Stores transaction hash to index</span>
+<span id="L236" class="ln">   236  </span>	err = app.state.db.Set(dbKey_byPubKey, byPubKey)
+<span id="L237" class="ln">   237  </span>	return err
+<span id="L238" class="ln">   238  </span>}
+<span id="L239" class="ln">   239  </span>
+<span id="L240" class="ln">   240  </span><span class="comment">// readTransactionFromDB fetches a transaction from the database.</span>
+<span id="L241" class="ln">   241  </span><span class="comment">// Given a transaction hash, the transaction content will be decrypted,</span>
+<span id="L242" class="ln">   242  </span><span class="comment">// otherwise the index is read to retrieve the hash and a second query</span>
+<span id="L243" class="ln">   243  </span><span class="comment">// is executed to fetch the transaction content by hash.</span>
+<span id="L244" class="ln">   244  </span>func (app *VStoreApplication) readTransactionFromDB(
+<span id="L245" class="ln">   245  </span>	queryType string,
+<span id="L246" class="ln">   246  </span>	value []byte,
+<span id="L247" class="ln">   247  </span>) ([]byte, error) {
+<span id="L248" class="ln">   248  </span>	var (
+<span id="L249" class="ln">   249  </span>		queryKey []byte = getQueryKey(queryType, value)
+<span id="L250" class="ln">   250  </span>	)
+<span id="L251" class="ln">   251  </span>
+<span id="L252" class="ln">   252  </span>	<span class="comment">// Read from the database</span>
+<span id="L253" class="ln">   253  </span>	data, err := app.state.db.Get(queryKey)
+<span id="L254" class="ln">   254  </span>	if len(data) == 0 || err != nil {
+<span id="L255" class="ln">   255  </span>		return []byte{}, err
+<span id="L256" class="ln">   256  </span>	}
+<span id="L257" class="ln">   257  </span>
+<span id="L258" class="ln">   258  </span>	<span class="comment">// TODO: Return array of transaction for height/pubkey indexes</span>
+<span id="L259" class="ln">   259  </span>	if queryType != QueryType_Default {
+<span id="L260" class="ln">   260  </span>		return []byte{}, nil
+<span id="L261" class="ln">   261  </span>	}
+<span id="L262" class="ln">   262  </span>
+<span id="L263" class="ln">   263  </span>	<span class="comment">// Unlock the decryption secret</span>
+<span id="L264" class="ln">   264  </span>	secret, err := app.priv.Identity().Secret()
+<span id="L265" class="ln">   265  </span>	if err != nil {
+<span id="L266" class="ln">   266  </span>		return []byte{}, nil
+<span id="L267" class="ln">   267  </span>	}
+<span id="L268" class="ln">   268  </span>	defer func() { secret = []byte{} }()
+<span id="L269" class="ln">   269  </span>
+<span id="L270" class="ln">   270  </span>	<span class="comment">// Decrypt the transaction data with the node&#39;s secret</span>
+<span id="L271" class="ln">   271  </span>	txData, err := Decrypt(secret, data)
+<span id="L272" class="ln">   272  </span>	if err != nil {
+<span id="L273" class="ln">   273  </span>		return []byte{}, nil
+<span id="L274" class="ln">   274  </span>	}
+<span id="L275" class="ln">   275  </span>
+<span id="L276" class="ln">   276  </span>	return txData, nil
+<span id="L277" class="ln">   277  </span>}
+<span id="L278" class="ln">   278  </span>
+<span id="L279" class="ln">   279  </span><span class="comment">// --------------------------------------------------------------------------</span>
+<span id="L280" class="ln">   280  </span><span class="comment">// VStoreApplication implements interface abcitypes.Application</span>
+<span id="L281" class="ln">   281  </span>
+<span id="L282" class="ln">   282  </span><span class="comment">// Info returns information about the State of the application. This is used</span>
+<span id="L283" class="ln">   283  </span><span class="comment">// everytime a CometBFT instance begins and forwards its version to the application.</span>
+<span id="L284" class="ln">   284  </span><span class="comment">// Based on this information, CometBFT will ensure synchronicity with the application</span>
+<span id="L285" class="ln">   285  </span><span class="comment">// by potentially replaying some blocks.</span>
+<span id="L286" class="ln">   286  </span><span class="comment">// If the application returns a 0 LastBlockHeight, CometBFT will call InitChain.</span>
+<span id="L287" class="ln">   287  </span><span class="comment">// Info implements abci.Application</span>
+<span id="L288" class="ln">   288  </span>func (app *VStoreApplication) Info(
+<span id="L289" class="ln">   289  </span>	_ context.Context,
+<span id="L290" class="ln">   290  </span>	info *abci.RequestInfo,
+<span id="L291" class="ln">   291  </span>) (*abci.ResponseInfo, error) {
+<span id="L292" class="ln">   292  </span>	<span class="comment">// State contains num_transactions, height &amp; merkle_roots</span>
+<span id="L293" class="ln">   293  </span>	appData, err := json.Marshal(app.state)
+<span id="L294" class="ln">   294  </span>	if err != nil {
+<span id="L295" class="ln">   295  </span>		panic(err)
+<span id="L296" class="ln">   296  </span>	}
+<span id="L297" class="ln">   297  </span>
+<span id="L298" class="ln">   298  </span>	return &amp;abci.ResponseInfo{
+<span id="L299" class="ln">   299  </span>		Data:             string(appData),
+<span id="L300" class="ln">   300  </span>		Version:          version.ABCIVersion,
+<span id="L301" class="ln">   301  </span>		AppVersion:       AppVersion,
+<span id="L302" class="ln">   302  </span>		LastBlockHeight:  app.state.Height,
+<span id="L303" class="ln">   303  </span>		LastBlockAppHash: app.state.Hash(),
+<span id="L304" class="ln">   304  </span>	}, nil
+<span id="L305" class="ln">   305  </span>}
+<span id="L306" class="ln">   306  </span>
+<span id="L307" class="ln">   307  </span><span class="comment">// InitChain returns the application hash in case the application starts with</span>
+<span id="L308" class="ln">   308  </span><span class="comment">// values pre-populated. This method is called whenever a new instance of the</span>
+<span id="L309" class="ln">   309  </span><span class="comment">// application is started, i.e. when LastBlockHeight is 0.</span>
+<span id="L310" class="ln">   310  </span><span class="comment">// InitChain implements abci.Application</span>
+<span id="L311" class="ln">   311  </span>func (app *VStoreApplication) InitChain(
+<span id="L312" class="ln">   312  </span>	_ context.Context,
+<span id="L313" class="ln">   313  </span>	chain *abci.RequestInitChain,
+<span id="L314" class="ln">   314  </span>) (*abci.ResponseInitChain, error) {
+<span id="L315" class="ln">   315  </span>	<span class="comment">// Creates an empty AppHash (32 bytes 0-filled)</span>
+<span id="L316" class="ln">   316  </span>	return &amp;abci.ResponseInitChain{
+<span id="L317" class="ln">   317  </span>		AppHash: app.state.Hash(),
+<span id="L318" class="ln">   318  </span>	}, nil
+<span id="L319" class="ln">   319  </span>}
+<span id="L320" class="ln">   320  </span>
+<span id="L321" class="ln">   321  </span><span class="comment">// CheckTx handles inbound transactions or in the case of re-CheckTx assesses old</span>
+<span id="L322" class="ln">   322  </span><span class="comment">// transaction validity after a state transition happened.</span>
+<span id="L323" class="ln">   323  </span><span class="comment">// It is preferable to keep the checks as stateless and as quick as possible.</span>
+<span id="L324" class="ln">   324  </span><span class="comment">// For the vfs application, we check that each transaction has a valid tx format:</span>
+<span id="L325" class="ln">   325  </span><span class="comment">// - Must not be empty</span>
+<span id="L326" class="ln">   326  </span><span class="comment">// - Must contain at least the owner pubkey (32 bytes) and a signature (64 bytes)</span>
+<span id="L327" class="ln">   327  </span><span class="comment">// - Must contain at least 1 byte of arbitrary data</span>
+<span id="L328" class="ln">   328  </span><span class="comment">// CheckTx implements abci.Application</span>
+<span id="L329" class="ln">   329  </span>func (app *VStoreApplication) CheckTx(
+<span id="L330" class="ln">   330  </span>	_ context.Context,
+<span id="L331" class="ln">   331  </span>	check *abci.RequestCheckTx,
+<span id="L332" class="ln">   332  </span>) (*abci.ResponseCheckTx, error) {
+<span id="L333" class="ln">   333  </span>	code := app.validateTx(check.Tx)
+<span id="L334" class="ln">   334  </span>	return &amp;abci.ResponseCheckTx{Code: code}, nil
+<span id="L335" class="ln">   335  </span>}
+<span id="L336" class="ln">   336  </span>
+<span id="L337" class="ln">   337  </span><span class="comment">// PrepareProposal is called only when the node is a proposer. CometBFT stages</span>
+<span id="L338" class="ln">   338  </span><span class="comment">// a set of transactions for the application.</span>
+<span id="L339" class="ln">   339  </span><span class="comment">// NOTE: we assume that CometBFT won&#39;t provide too many transactions for 1 block.</span>
+<span id="L340" class="ln">   340  </span><span class="comment">// PrepareProposal implements abci.Application</span>
+<span id="L341" class="ln">   341  </span>func (app *VStoreApplication) PrepareProposal(
+<span id="L342" class="ln">   342  </span>	ctx context.Context,
+<span id="L343" class="ln">   343  </span>	proposal *abci.RequestPrepareProposal,
+<span id="L344" class="ln">   344  </span>) (*abci.ResponsePrepareProposal, error) {
+<span id="L345" class="ln">   345  </span>	<span class="comment">// Validate transactions before creating proposal</span>
+<span id="L346" class="ln">   346  </span>	blockData := make([][]byte, 0, len(proposal.Txs))
+<span id="L347" class="ln">   347  </span>	for _, tx := range proposal.Txs {
+<span id="L348" class="ln">   348  </span>		resp, err := app.CheckTx(ctx, &amp;abci.RequestCheckTx{Tx: tx})
+<span id="L349" class="ln">   349  </span>		if resp.Code != CodeTypeOK || err != nil {
+<span id="L350" class="ln">   350  </span>			continue
+<span id="L351" class="ln">   351  </span>		}
+<span id="L352" class="ln">   352  </span>
+<span id="L353" class="ln">   353  </span>		blockData = append(blockData, tx)
+<span id="L354" class="ln">   354  </span>	}
+<span id="L355" class="ln">   355  </span>
+<span id="L356" class="ln">   356  </span>	<span class="comment">// Forwarded block data are all valid transactions</span>
+<span id="L357" class="ln">   357  </span>	return &amp;abci.ResponsePrepareProposal{Txs: blockData}, nil
+<span id="L358" class="ln">   358  </span>}
+<span id="L359" class="ln">   359  </span>
+<span id="L360" class="ln">   360  </span><span class="comment">// ProcessProposal is called whenever a node receives a complete proposal and allows</span>
+<span id="L361" class="ln">   361  </span><span class="comment">// the application to validate the proposal.</span>
+<span id="L362" class="ln">   362  </span><span class="comment">// Only validators from the validator set will have this method called.</span>
+<span id="L363" class="ln">   363  </span><span class="comment">// ProcessProposal implements abci.Application</span>
+<span id="L364" class="ln">   364  </span>func (app *VStoreApplication) ProcessProposal(
+<span id="L365" class="ln">   365  </span>	ctx context.Context,
+<span id="L366" class="ln">   366  </span>	proposal *abci.RequestProcessProposal,
+<span id="L367" class="ln">   367  </span>) (*abci.ResponseProcessProposal, error) {
+<span id="L368" class="ln">   368  </span>	for _, tx := range proposal.Txs {
+<span id="L369" class="ln">   369  </span>		<span class="comment">// As CheckTx is a full validity check, we can reuse</span>
+<span id="L370" class="ln">   370  </span>		if resp, err := app.CheckTx(ctx, &amp;abci.RequestCheckTx{Tx: tx}); err != nil || resp.Code != CodeTypeOK {
+<span id="L371" class="ln">   371  </span>			return &amp;abci.ResponseProcessProposal{Status: abci.ResponseProcessProposal_REJECT}, nil
+<span id="L372" class="ln">   372  </span>		}
+<span id="L373" class="ln">   373  </span>	}
+<span id="L374" class="ln">   374  </span>	return &amp;abci.ResponseProcessProposal{Status: abci.ResponseProcessProposal_ACCEPT}, nil
+<span id="L375" class="ln">   375  </span>}
+<span id="L376" class="ln">   376  </span>
+<span id="L377" class="ln">   377  </span><span class="comment">// FinalizeBlock executes the block against the application state. Transactions</span>
+<span id="L378" class="ln">   378  </span><span class="comment">// are processed one-by-one and are cached in memory. They will be persisted</span>
+<span id="L379" class="ln">   379  </span><span class="comment">// when Commit is called.</span>
+<span id="L380" class="ln">   380  </span><span class="comment">// ConsensusParams are never changed.</span>
+<span id="L381" class="ln">   381  </span><span class="comment">// FinalizeBlock implements abci.Application</span>
+<span id="L382" class="ln">   382  </span>func (app *VStoreApplication) FinalizeBlock(
+<span id="L383" class="ln">   383  </span>	ctx context.Context,
+<span id="L384" class="ln">   384  </span>	req *abci.RequestFinalizeBlock,
+<span id="L385" class="ln">   385  </span>) (*abci.ResponseFinalizeBlock, error) {
+<span id="L386" class="ln">   386  </span>
+<span id="L387" class="ln">   387  </span>	<span class="comment">// Updates the Height and NumTransactions by processing transactions</span>
+<span id="L388" class="ln">   388  </span>	<span class="comment">// and creates signed data payloads from bytes</span>
+<span id="L389" class="ln">   389  </span>	respTxs := app.processFinalizeBlock(ctx, req)
+<span id="L390" class="ln">   390  </span>
+<span id="L391" class="ln">   391  </span>	<span class="comment">// Update the merkle root including staged transaction hashes</span>
+<span id="L392" class="ln">   392  </span>	app.commitMerkleRoots()
+<span id="L393" class="ln">   393  </span>
+<span id="L394" class="ln">   394  </span>	<span class="comment">// Respond with transaction results and updated AppHash</span>
+<span id="L395" class="ln">   395  </span>	response := &amp;abci.ResponseFinalizeBlock{
+<span id="L396" class="ln">   396  </span>		TxResults: respTxs,
+<span id="L397" class="ln">   397  </span>		AppHash:   app.state.Hash(),
+<span id="L398" class="ln">   398  </span>	}
+<span id="L399" class="ln">   399  </span>
+<span id="L400" class="ln">   400  </span>	return response, nil
+<span id="L401" class="ln">   401  </span>}
+<span id="L402" class="ln">   402  </span>
+<span id="L403" class="ln">   403  </span><span class="comment">// Commit is called after FinalizeBlock and after the CometBFT state updates.</span>
+<span id="L404" class="ln">   404  </span><span class="comment">// The vfs application persists the staged data (from FinalizeBlock) in database</span>
+<span id="L405" class="ln">   405  </span><span class="comment">// in a modified key-value store where the key is the tx hash, and where</span>
+<span id="L406" class="ln">   406  </span><span class="comment">// values describe marshalled protobuf instances of vfsp2p.Transaction.</span>
+<span id="L407" class="ln">   407  </span><span class="comment">// Commit implements abci.Application</span>
+<span id="L408" class="ln">   408  </span>func (app *VStoreApplication) Commit(
+<span id="L409" class="ln">   409  </span>	_ context.Context,
+<span id="L410" class="ln">   410  </span>	commit *abci.RequestCommit,
+<span id="L411" class="ln">   411  </span>) (*abci.ResponseCommit, error) {
+<span id="L412" class="ln">   412  </span>	<span class="comment">// Read the encryption secret</span>
+<span id="L413" class="ln">   413  </span>	secret, err := app.priv.Identity().Secret()
+<span id="L414" class="ln">   414  </span>	if err != nil {
+<span id="L415" class="ln">   415  </span>		return nil, err
+<span id="L416" class="ln">   416  </span>	}
+<span id="L417" class="ln">   417  </span>
+<span id="L418" class="ln">   418  </span>	defer func() {
+<span id="L419" class="ln">   419  </span>		secret = []byte{}
+<span id="L420" class="ln">   420  </span>	}()
+<span id="L421" class="ln">   421  </span>
+<span id="L422" class="ln">   422  </span>	<span class="comment">// Persist all the staged data in vfs</span>
+<span id="L423" class="ln">   423  </span>	for _, payload := range app.stage {
+<span id="L424" class="ln">   424  </span>		<span class="comment">// Use transaction hash as the key (index by hash)</span>
+<span id="L425" class="ln">   425  </span>		dbKey := prefixKey(payload.Hash)
+<span id="L426" class="ln">   426  </span>
+<span id="L427" class="ln">   427  </span>		<span class="comment">// Transaction hash must not exist</span>
+<span id="L428" class="ln">   428  </span>		if resp, err := app.state.db.Has(dbKey); err != nil || resp {
+<span id="L429" class="ln">   429  </span>			return nil, errors.New(&#34;transaction hash already exists&#34;)
+<span id="L430" class="ln">   430  </span>		}
+<span id="L431" class="ln">   431  </span>
+<span id="L432" class="ln">   432  </span>		<span class="comment">// Encrypt the transaction using the node&#39;s secret</span>
+<span id="L433" class="ln">   433  </span>		encProto, err := Encrypt(secret, payload.Bytes())
+<span id="L434" class="ln">   434  </span>		if err != nil {
+<span id="L435" class="ln">   435  </span>			return nil, err
+<span id="L436" class="ln">   436  </span>		}
+<span id="L437" class="ln">   437  </span>
+<span id="L438" class="ln">   438  </span>		<span class="comment">// Stores an encrypted vfsp2p.Transaction protobuf payload</span>
+<span id="L439" class="ln">   439  </span>		err = app.state.db.Set(dbKey, encProto)
+<span id="L440" class="ln">   440  </span>		if err != nil {
+<span id="L441" class="ln">   441  </span>			return nil, err
+<span id="L442" class="ln">   442  </span>		}
+<span id="L443" class="ln">   443  </span>	}
+<span id="L444" class="ln">   444  </span>
+<span id="L445" class="ln">   445  </span>	<span class="comment">// Indexes transaction hash by height and signer pubkey</span>
+<span id="L446" class="ln">   446  </span>	app.commitTransactionHashes()
+<span id="L447" class="ln">   447  </span>
+<span id="L448" class="ln">   448  </span>	<span class="comment">// Save the State in database with updated merkle roots</span>
+<span id="L449" class="ln">   449  </span>	app.commitStateTransitions()
+<span id="L450" class="ln">   450  </span>
+<span id="L451" class="ln">   451  </span>	<span class="comment">// Response OK</span>
+<span id="L452" class="ln">   452  </span>	return &amp;abci.ResponseCommit{}, nil
+<span id="L453" class="ln">   453  </span>}
+<span id="L454" class="ln">   454  </span>
+<span id="L455" class="ln">   455  </span><span class="comment">// Query returns an associated value or nil if missing.</span>
+<span id="L456" class="ln">   456  </span><span class="comment">// Expects a transaction hash in the request&#39;s Data field.</span>
+<span id="L457" class="ln">   457  </span><span class="comment">// Query implements abci.Application</span>
+<span id="L458" class="ln">   458  </span>func (app *VStoreApplication) Query(
+<span id="L459" class="ln">   459  </span>	_ context.Context,
+<span id="L460" class="ln">   460  </span>	req *abci.RequestQuery,
+<span id="L461" class="ln">   461  </span>) (*abci.ResponseQuery, error) {
+<span id="L462" class="ln">   462  </span>	response := &amp;abci.ResponseQuery{
+<span id="L463" class="ln">   463  </span>		Key:    req.Data,
+<span id="L464" class="ln">   464  </span>		Height: app.state.Height,
+<span id="L465" class="ln">   465  </span>	}
+<span id="L466" class="ln">   466  </span>
+<span id="L467" class="ln">   467  </span>	queryType := getQueryType(req.Path)
+<span id="L468" class="ln">   468  </span>	plainData, err := app.readTransactionFromDB(queryType, req.Data)
+<span id="L469" class="ln">   469  </span>	if err != nil {
+<span id="L470" class="ln">   470  </span>		return response, err
+<span id="L471" class="ln">   471  </span>	}
+<span id="L472" class="ln">   472  </span>
+<span id="L473" class="ln">   473  </span>	response.Value = plainData
+<span id="L474" class="ln">   474  </span>	response.Log = &#34;exists&#34;
+<span id="L475" class="ln">   475  </span>	if req.Prove {
+<span id="L476" class="ln">   476  </span>		response.Index = -1 <span class="comment">// TODO make Proof return index</span>
+<span id="L477" class="ln">   477  </span>	}
+<span id="L478" class="ln">   478  </span>
+<span id="L479" class="ln">   479  </span>	return response, nil
+<span id="L480" class="ln">   480  </span>}
+<span id="L481" class="ln">   481  </span>
+<span id="L482" class="ln">   482  </span><span class="comment">// --------------------------------------------------------------------------</span>
+<span id="L483" class="ln">   483  </span><span class="comment">// Private helpers</span>
+<span id="L484" class="ln">   484  </span>
+<span id="L485" class="ln">   485  </span><span class="comment">// getQueryKey returns a prefixed database key depending of a queryType.</span>
+<span id="L486" class="ln">   486  </span>func getQueryKey(queryType string, value []byte) []byte {
+<span id="L487" class="ln">   487  </span>	switch queryType {
+<span id="L488" class="ln">   488  </span>	case QueryType_Height:
+<span id="L489" class="ln">   489  </span>		return prefixKeyWith(value, vfsPrefixKeyByHeight)
+<span id="L490" class="ln">   490  </span>	case QueryType_PubKey:
+<span id="L491" class="ln">   491  </span>		return prefixKeyWith(value, vfsPrefixKeyByPubKey)
+<span id="L492" class="ln">   492  </span>	default:
+<span id="L493" class="ln">   493  </span>		break
+<span id="L494" class="ln">   494  </span>	}
+<span id="L495" class="ln">   495  </span>
+<span id="L496" class="ln">   496  </span>	return prefixKey(value)
+<span id="L497" class="ln">   497  </span>}
+<span id="L498" class="ln">   498  </span>
+<span id="L499" class="ln">   499  </span><span class="comment">// getQueryType returns the query type depending on a request path.</span>
+<span id="L500" class="ln">   500  </span>func getQueryType(path string) string {
+<span id="L501" class="ln">   501  </span>	switch path {
+<span id="L502" class="ln">   502  </span>	case &#34;/height&#34;:
+<span id="L503" class="ln">   503  </span>		return QueryType_Height
+<span id="L504" class="ln">   504  </span>	case &#34;/pubkey&#34;:
+<span id="L505" class="ln">   505  </span>		return QueryType_PubKey
+<span id="L506" class="ln">   506  </span>	default:
+<span id="L507" class="ln">   507  </span>		break
+<span id="L508" class="ln">   508  </span>	}
+<span id="L509" class="ln">   509  </span>
+<span id="L510" class="ln">   510  </span>	return QueryType_Default
+<span id="L511" class="ln">   511  </span>}
+<span id="L512" class="ln">   512  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.22.3.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

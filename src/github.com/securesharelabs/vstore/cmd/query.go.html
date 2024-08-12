@@ -1,0 +1,214 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/securesharelabs/vstore/cmd/query.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/cmd">cmd</a>/<span class="text-muted">query.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/cmd">github.com/securesharelabs/vstore/cmd</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package cmd
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;bufio&#34;
+<span id="L5" class="ln">     5  </span>	&#34;encoding/hex&#34;
+<span id="L6" class="ln">     6  </span>	&#34;encoding/json&#34;
+<span id="L7" class="ln">     7  </span>	&#34;fmt&#34;
+<span id="L8" class="ln">     8  </span>	&#34;log&#34;
+<span id="L9" class="ln">     9  </span>	&#34;os&#34;
+<span id="L10" class="ln">    10  </span>	&#34;strings&#34;
+<span id="L11" class="ln">    11  </span>
+<span id="L12" class="ln">    12  </span>	vfsp2p &#34;github.com/securesharelabs/vstore/api/vstore/v1&#34;
+<span id="L13" class="ln">    13  </span>	vfs &#34;github.com/securesharelabs/vstore/vfs&#34;
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span>	cmtlog &#34;github.com/cometbft/cometbft/libs/log&#34;
+<span id="L16" class="ln">    16  </span>	rpc &#34;github.com/cometbft/cometbft/rpc/client/http&#34;
+<span id="L17" class="ln">    17  </span>
+<span id="L18" class="ln">    18  </span>	&#34;github.com/cosmos/gogoproto/proto&#34;
+<span id="L19" class="ln">    19  </span>	&#34;github.com/spf13/cobra&#34;
+<span id="L20" class="ln">    20  </span>)
+<span id="L21" class="ln">    21  </span>
+<span id="L22" class="ln">    22  </span><span class="comment">// Used for flags</span>
+<span id="L23" class="ln">    23  </span>var transactionHash string
+<span id="L24" class="ln">    24  </span>var printDataAsText bool
+<span id="L25" class="ln">    25  </span>
+<span id="L26" class="ln">    26  </span>func init() {
+<span id="L27" class="ln">    27  </span>	<span class="comment">// e.g.: vstore query --hash &#34;3816D803...9E03&#34;</span>
+<span id="L28" class="ln">    28  </span>	queryCmd.PersistentFlags().StringVar(
+<span id="L29" class="ln">    29  </span>		&amp;transactionHash,
+<span id="L30" class="ln">    30  </span>		&#34;hash&#34;,
+<span id="L31" class="ln">    31  </span>		&#34;&#34;,
+<span id="L32" class="ln">    32  </span>		&#34;Build a query by transaction hash.&#34;,
+<span id="L33" class="ln">    33  </span>	)
+<span id="L34" class="ln">    34  </span>
+<span id="L35" class="ln">    35  </span>	<span class="comment">// e.g.: vstore query --hash &#34;3816D803...9E03&#34; --json</span>
+<span id="L36" class="ln">    36  </span>	queryCmd.PersistentFlags().BoolVarP(
+<span id="L37" class="ln">    37  </span>		&amp;printAsJSON,
+<span id="L38" class="ln">    38  </span>		&#34;json&#34;,
+<span id="L39" class="ln">    39  </span>		&#34;j&#34;,
+<span id="L40" class="ln">    40  </span>		false,
+<span id="L41" class="ln">    41  </span>		&#34;Display the information in a JSON format.&#34;,
+<span id="L42" class="ln">    42  </span>	)
+<span id="L43" class="ln">    43  </span>
+<span id="L44" class="ln">    44  </span>	<span class="comment">// e.g.: vstore query --hash &#34;3816D803...9E03&#34; --plain</span>
+<span id="L45" class="ln">    45  </span>	queryCmd.PersistentFlags().BoolVarP(
+<span id="L46" class="ln">    46  </span>		&amp;printDataAsText,
+<span id="L47" class="ln">    47  </span>		&#34;plain&#34;,
+<span id="L48" class="ln">    48  </span>		&#34;p&#34;,
+<span id="L49" class="ln">    49  </span>		false,
+<span id="L50" class="ln">    50  </span>		&#34;Display the transaction body in UTF-8 format.&#34;,
+<span id="L51" class="ln">    51  </span>	)
+<span id="L52" class="ln">    52  </span>
+<span id="L53" class="ln">    53  </span>	vstoreCmd.AddCommand(queryCmd)
+<span id="L54" class="ln">    54  </span>}
+<span id="L55" class="ln">    55  </span>
+<span id="L56" class="ln">    56  </span>var queryCmd = &amp;cobra.Command{
+<span id="L57" class="ln">    57  </span>	Use:   &#34;query&#34;,
+<span id="L58" class="ln">    58  </span>	Short: &#34;Query your vStore instance for transactions&#34;,
+<span id="L59" class="ln">    59  </span>	Long: `Query your vStore instance for transactions using:
+<span id="L60" class="ln">    60  </span>
+<span id="L61" class="ln">    61  </span>	- the transaction hash as returned by the factory subcommand ; or
+<span id="L62" class="ln">    62  </span>	- the block height in which the transaction was included ; or
+<span id="L63" class="ln">    63  </span>	- the signer public key attached to the transaction.`,
+<span id="L64" class="ln">    64  </span>
+<span id="L65" class="ln">    65  </span>	Example: `  vstore query
+<span id="L66" class="ln">    66  </span>  vstore query --hash &#34;XXX&#34;`,
+<span id="L67" class="ln">    67  </span>
+<span id="L68" class="ln">    68  </span>	Run: func(cmd *cobra.Command, args []string) {
+<span id="L69" class="ln">    69  </span>
+<span id="L70" class="ln">    70  </span>		<span class="comment">// Prepare the local RPC client</span>
+<span id="L71" class="ln">    71  </span>		<span class="comment">// Note: A node must be running in the background</span>
+<span id="L72" class="ln">    72  </span>		<span class="comment">// TODO: Permit overwrite of RPC remote address</span>
+<span id="L73" class="ln">    73  </span>		logger := cmtlog.NewTMLogger(cmtlog.NewSyncWriter(os.Stdout))
+<span id="L74" class="ln">    74  </span>		cli, err := rpc.New(&#34;http://localhost:26657&#34;, &#34;/websocket&#34;)
+<span id="L75" class="ln">    75  </span>		if err != nil {
+<span id="L76" class="ln">    76  </span>			log.Fatalf(&#34;could not connect to RPC server: %v&#34;, err)
+<span id="L77" class="ln">    77  </span>		}
+<span id="L78" class="ln">    78  </span>		cli.SetLogger(logger)
+<span id="L79" class="ln">    79  </span>
+<span id="L80" class="ln">    80  </span>		<span class="comment">// Ask for hash if not provided with --hash</span>
+<span id="L81" class="ln">    81  </span>		<span class="comment">// TODO: Permit using height or pubkey indexes</span>
+<span id="L82" class="ln">    82  </span>		if len(transactionHash) == 0 {
+<span id="L83" class="ln">    83  </span>			fmt.Printf(&#34;Enter the transaction hash: &#34;)
+<span id="L84" class="ln">    84  </span>			reader := bufio.NewReader(os.Stdin)
+<span id="L85" class="ln">    85  </span>			input, err := reader.ReadString(&#39;\n&#39;)
+<span id="L86" class="ln">    86  </span>			if err != nil {
+<span id="L87" class="ln">    87  </span>				log.Fatalf(&#34;could not read transaction hash: %v&#34;, err)
+<span id="L88" class="ln">    88  </span>			}
+<span id="L89" class="ln">    89  </span>
+<span id="L90" class="ln">    90  </span>			transactionHash = strings.TrimSuffix(input, &#34;\n&#34;)
+<span id="L91" class="ln">    91  </span>		}
+<span id="L92" class="ln">    92  </span>
+<span id="L93" class="ln">    93  </span>		<span class="comment">// Parse transaction hash (for query key)</span>
+<span id="L94" class="ln">    94  </span>		hbz, err := hex.DecodeString(transactionHash)
+<span id="L95" class="ln">    95  </span>		if err != nil {
+<span id="L96" class="ln">    96  </span>			log.Fatalf(&#34;could not use provided transaction hash: %v&#34;, err)
+<span id="L97" class="ln">    97  </span>		}
+<span id="L98" class="ln">    98  </span>
+<span id="L99" class="ln">    99  </span>		<span class="comment">// Execute query using RPC client</span>
+<span id="L100" class="ln">   100  </span>		response, err := cli.ABCIQuery(cmd.Context(), &#34;/hash&#34;, hbz)
+<span id="L101" class="ln">   101  </span>
+<span id="L102" class="ln">   102  </span>		if err != nil || response.Response.Code != vfs.CodeTypeOK {
+<span id="L103" class="ln">   103  </span>			log.Fatalf(&#34;error occured on query: (%d - %s) with error: %v&#34;, response.Response.Code, response.Response.Log, err)
+<span id="L104" class="ln">   104  </span>		}
+<span id="L105" class="ln">   105  </span>
+<span id="L106" class="ln">   106  </span>		if len(response.Response.Value) == 0 {
+<span id="L107" class="ln">   107  </span>			log.Fatalf(&#34;could not find transaction with hash: %x&#34;, hbz)
+<span id="L108" class="ln">   108  </span>		}
+<span id="L109" class="ln">   109  </span>
+<span id="L110" class="ln">   110  </span>		tx := new(vfsp2p.Transaction)
+<span id="L111" class="ln">   111  </span>		err = proto.Unmarshal(response.Response.Value, tx)
+<span id="L112" class="ln">   112  </span>		if err != nil {
+<span id="L113" class="ln">   113  </span>			log.Fatalf(&#34;could not parse Transaction bytes: %v&#34;, err)
+<span id="L114" class="ln">   114  </span>		}
+<span id="L115" class="ln">   115  </span>
+<span id="L116" class="ln">   116  </span>		txBody := string(tx.Body)
+<span id="L117" class="ln">   117  </span>		if !printDataAsText {
+<span id="L118" class="ln">   118  </span>			txBody = fmt.Sprintf(&#34;%x&#34;, tx.Body)
+<span id="L119" class="ln">   119  </span>		}
+<span id="L120" class="ln">   120  </span>
+<span id="L121" class="ln">   121  </span>		txInfo := struct {
+<span id="L122" class="ln">   122  </span>			Signer    string
+<span id="L123" class="ln">   123  </span>			Signature string
+<span id="L124" class="ln">   124  </span>			Size      int64
+<span id="L125" class="ln">   125  </span>			Data      string
+<span id="L126" class="ln">   126  </span>		}{
+<span id="L127" class="ln">   127  </span>			fmt.Sprintf(&#34;%x&#34;, tx.Signer.GetEd25519()),
+<span id="L128" class="ln">   128  </span>			fmt.Sprintf(&#34;%x&#34;, tx.Signature),
+<span id="L129" class="ln">   129  </span>			int64(tx.Len),
+<span id="L130" class="ln">   130  </span>			txBody,
+<span id="L131" class="ln">   131  </span>		}
+<span id="L132" class="ln">   132  </span>
+<span id="L133" class="ln">   133  </span>		if printAsJSON {
+<span id="L134" class="ln">   134  </span>			json, _ := json.MarshalIndent(txInfo, &#34;&#34;, &#34;  &#34;)
+<span id="L135" class="ln">   135  </span>			fmt.Print(string(json) + &#34;\n&#34;)
+<span id="L136" class="ln">   136  </span>			return <span class="comment">// Job done.</span>
+<span id="L137" class="ln">   137  </span>		}
+<span id="L138" class="ln">   138  </span>
+<span id="L139" class="ln">   139  </span>		fmt.Printf(&#34;vStore v1.0 (vfs v%d) - ABCI: \n&#34;, vfs.AppVersion)
+<span id="L140" class="ln">   140  </span>		fmt.Printf(&#34;  Signer PubKey: %s\n&#34;, txInfo.Signer)
+<span id="L141" class="ln">   141  </span>		fmt.Printf(&#34;      Signature: %s\n&#34;, txInfo.Signature)
+<span id="L142" class="ln">   142  </span>		fmt.Printf(&#34;           Size: %d\n&#34;, txInfo.Size)
+<span id="L143" class="ln">   143  </span>		fmt.Printf(&#34;           Data: %s\n&#34;, txInfo.Data)
+<span id="L144" class="ln">   144  </span>	},
+<span id="L145" class="ln">   145  </span>}
+<span id="L146" class="ln">   146  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.22.3.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

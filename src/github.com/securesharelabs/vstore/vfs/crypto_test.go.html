@@ -1,0 +1,212 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/securesharelabs/vstore/vfs/crypto_test.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/vfs">vfs</a>/<span class="text-muted">crypto_test.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/vfs">github.com/securesharelabs/vstore/vfs</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package vfs
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;os&#34;
+<span id="L5" class="ln">     5  </span>	&#34;path/filepath&#34;
+<span id="L6" class="ln">     6  </span>	&#34;testing&#34;
+<span id="L7" class="ln">     7  </span>
+<span id="L8" class="ln">     8  </span>	&#34;github.com/stretchr/testify/assert&#34;
+<span id="L9" class="ln">     9  </span>	&#34;github.com/stretchr/testify/require&#34;
+<span id="L10" class="ln">    10  </span>
+<span id="L11" class="ln">    11  </span>	&#34;github.com/cometbft/cometbft/crypto/tmhash&#34;
+<span id="L12" class="ln">    12  </span>)
+<span id="L13" class="ln">    13  </span>
+<span id="L14" class="ln">    14  </span>func TestVStoreCryptoEncryptDecrypt(t *testing.T) {
+<span id="L15" class="ln">    15  </span>	<span class="comment">// ----------------------------------------------</span>
+<span id="L16" class="ln">    16  </span>	<span class="comment">// Success cases</span>
+<span id="L17" class="ln">    17  </span>	secrets := [][]byte{
+<span id="L18" class="ln">    18  </span>		[]byte(&#34;secretofthirtytwobytesforaes====&#34;),
+<span id="L19" class="ln">    19  </span>		tmhash.Sum([]byte(&#34;anothersecretforaes==&#34;)),
+<span id="L20" class="ln">    20  </span>		[]byte(&#34;anothersecretofthirtytwobytes===&#34;),
+<span id="L21" class="ln">    21  </span>		tmhash.Sum([]byte(&#34;123&#34;)),
+<span id="L22" class="ln">    22  </span>		tmhash.Sum([]byte(&#34;456&#34;)),
+<span id="L23" class="ln">    23  </span>	}
+<span id="L24" class="ln">    24  </span>
+<span id="L25" class="ln">    25  </span>	for _, secret := range secrets {
+<span id="L26" class="ln">    26  </span>		plainData := []byte(&#34;Hello, World!&#34;)
+<span id="L27" class="ln">    27  </span>
+<span id="L28" class="ln">    28  </span>		ciphertext, err := Encrypt(secret, plainData)
+<span id="L29" class="ln">    29  </span>		assert.NoError(t, err)
+<span id="L30" class="ln">    30  </span>		assert.NotEmpty(t, ciphertext)
+<span id="L31" class="ln">    31  </span>
+<span id="L32" class="ln">    32  </span>		plaintext, err := Decrypt(secret, ciphertext)
+<span id="L33" class="ln">    33  </span>		assert.NoError(t, err)
+<span id="L34" class="ln">    34  </span>		assert.Equal(t, plainData, plaintext)
+<span id="L35" class="ln">    35  </span>	}
+<span id="L36" class="ln">    36  </span>
+<span id="L37" class="ln">    37  </span>	<span class="comment">// ----------------------------------------------</span>
+<span id="L38" class="ln">    38  </span>	<span class="comment">// Secret size failure cases</span>
+<span id="L39" class="ln">    39  </span>	failSecrets := [][]byte{
+<span id="L40" class="ln">    40  </span>		[]byte(&#34;01&#34;),
+<span id="L41" class="ln">    41  </span>		[]byte(&#34;asecretthatistooshort&#34;),
+<span id="L42" class="ln">    42  </span>		[]byte(&#34;asecretthatistoolongandcantbeusedwithoutbeinghashed&#34;),
+<span id="L43" class="ln">    43  </span>	}
+<span id="L44" class="ln">    44  </span>
+<span id="L45" class="ln">    45  </span>	for _, failSecret := range failSecrets {
+<span id="L46" class="ln">    46  </span>		plainData := []byte(&#34;Hello, World!&#34;)
+<span id="L47" class="ln">    47  </span>
+<span id="L48" class="ln">    48  </span>		ciphertext, err := Encrypt(failSecret, plainData)
+<span id="L49" class="ln">    49  </span>		assert.NotNil(t, err)
+<span id="L50" class="ln">    50  </span>		assert.Empty(t, ciphertext)
+<span id="L51" class="ln">    51  </span>	}
+<span id="L52" class="ln">    52  </span>
+<span id="L53" class="ln">    53  </span>	<span class="comment">// ----------------------------------------------</span>
+<span id="L54" class="ln">    54  </span>	<span class="comment">// Secret manipulation failures</span>
+<span id="L55" class="ln">    55  </span>	for _, secret := range secrets {
+<span id="L56" class="ln">    56  </span>		plainData := []byte(&#34;Hello, World!&#34;)
+<span id="L57" class="ln">    57  </span>
+<span id="L58" class="ln">    58  </span>		ciphertext, err := Encrypt(secret, plainData)
+<span id="L59" class="ln">    59  </span>		require.NoError(t, err)
+<span id="L60" class="ln">    60  </span>		require.NotEmpty(t, ciphertext)
+<span id="L61" class="ln">    61  </span>
+<span id="L62" class="ln">    62  </span>		failSecret := secret[1:] <span class="comment">// lose first byte</span>
+<span id="L63" class="ln">    63  </span>		plaintext, err := Decrypt(failSecret, ciphertext)
+<span id="L64" class="ln">    64  </span>		assert.NotNil(t, err)
+<span id="L65" class="ln">    65  </span>		assert.Empty(t, plaintext)
+<span id="L66" class="ln">    66  </span>
+<span id="L67" class="ln">    67  </span>		failSecret = secret[:] <span class="comment">// manipulate</span>
+<span id="L68" class="ln">    68  </span>		failSecret[0] = 0
+<span id="L69" class="ln">    69  </span>
+<span id="L70" class="ln">    70  </span>		plaintext, err = Decrypt(failSecret, ciphertext)
+<span id="L71" class="ln">    71  </span>		assert.NotNil(t, err)
+<span id="L72" class="ln">    72  </span>		assert.Empty(t, plaintext)
+<span id="L73" class="ln">    73  </span>	}
+<span id="L74" class="ln">    74  </span>}
+<span id="L75" class="ln">    75  </span>
+<span id="L76" class="ln">    76  </span>func TestVStoreCryptoGenerateSecret(t *testing.T) {
+<span id="L77" class="ln">    77  </span>	<span class="comment">// ----------------------------------------------</span>
+<span id="L78" class="ln">    78  </span>	<span class="comment">// Success cases</span>
+<span id="L79" class="ln">    79  </span>	pws := [][]byte{
+<span id="L80" class="ln">    80  </span>		[]byte(&#34;1&#34;),
+<span id="L81" class="ln">    81  </span>		[]byte(&#34;test&#34;),
+<span id="L82" class="ln">    82  </span>		[]byte(&#34;testpassword&#34;),
+<span id="L83" class="ln">    83  </span>		[]byte(&#34;^{&amp;,fqG6[]&lt;Pe(i7,ADptqeZt{?^DB%=&#34;),
+<span id="L84" class="ln">    84  </span>		[]byte(&#34;ZhmSBMGoQK9FktNf4SZXE5US6MHUadoe&#34;),
+<span id="L85" class="ln">    85  </span>	}
+<span id="L86" class="ln">    86  </span>
+<span id="L87" class="ln">    87  </span>	for _, pw := range pws {
+<span id="L88" class="ln">    88  </span>		<span class="comment">// test with empty salt</span>
+<span id="L89" class="ln">    89  </span>		secret, salt, err := GenerateSecret(pw, []byte{}) <span class="comment">// empty salt uses random salt</span>
+<span id="L90" class="ln">    90  </span>		assert.NoError(t, err)
+<span id="L91" class="ln">    91  </span>		assert.Len(t, secret, 32)
+<span id="L92" class="ln">    92  </span>		assert.Len(t, salt, 8)
+<span id="L93" class="ln">    93  </span>
+<span id="L94" class="ln">    94  </span>		<span class="comment">// test with filled salt</span>
+<span id="L95" class="ln">    95  </span>		secret2, salt2, err2 := GenerateSecret(pw, salt) <span class="comment">// provided salt</span>
+<span id="L96" class="ln">    96  </span>		assert.NoError(t, err2)
+<span id="L97" class="ln">    97  </span>		assert.Len(t, secret2, 32)
+<span id="L98" class="ln">    98  </span>		assert.Len(t, salt2, 8)
+<span id="L99" class="ln">    99  </span>		assert.Equal(t, secret, secret2)
+<span id="L100" class="ln">   100  </span>		assert.Equal(t, salt, salt2)
+<span id="L101" class="ln">   101  </span>	}
+<span id="L102" class="ln">   102  </span>
+<span id="L103" class="ln">   103  </span>	<span class="comment">// ----------------------------------------------</span>
+<span id="L104" class="ln">   104  </span>	<span class="comment">// Error cases</span>
+<span id="L105" class="ln">   105  </span>	pw := []byte(&#34;&#34;) <span class="comment">// empty password not allowed</span>
+<span id="L106" class="ln">   106  </span>	_, _, err := GenerateSecret(pw, []byte{})
+<span id="L107" class="ln">   107  </span>	assert.Error(t, err, &#34;expected error for empty password&#34;)
+<span id="L108" class="ln">   108  </span>
+<span id="L109" class="ln">   109  </span>	pw = []byte(&#34;any&#34;)
+<span id="L110" class="ln">   110  </span>	salt := []byte(&#34;1234567&#34;) <span class="comment">// missing 1 byte</span>
+<span id="L111" class="ln">   111  </span>	_, _, err = GenerateSecret(pw, salt)
+<span id="L112" class="ln">   112  </span>	assert.Error(t, err, &#34;expected error for invalid salt length&#34;)
+<span id="L113" class="ln">   113  </span>}
+<span id="L114" class="ln">   114  </span>
+<span id="L115" class="ln">   115  </span>func TestVStoreCryptoMustGenerateIdentity(t *testing.T) {
+<span id="L116" class="ln">   116  </span>	<span class="comment">// create a unique, concurrency-safe test directory under os.TempDir()</span>
+<span id="L117" class="ln">   117  </span>	rootDir, _ := os.MkdirTemp(&#34;&#34;, &#34;test-vstore-crypto-must_generate_identity&#34;)
+<span id="L118" class="ln">   118  </span>	defer os.RemoveAll(rootDir)
+<span id="L119" class="ln">   119  </span>
+<span id="L120" class="ln">   120  </span>	<span class="comment">// create a unique identity for this vfs node (for encrypting db)</span>
+<span id="L121" class="ln">   121  </span>	pw := []byte(&#34;testpassword&#34;)
+<span id="L122" class="ln">   122  </span>	priv, pub := MustGenerateIdentity(filepath.Join(rootDir, &#34;id&#34;), pw)
+<span id="L123" class="ln">   123  </span>	assert.NotEmpty(t, priv)
+<span id="L124" class="ln">   124  </span>	assert.NotEmpty(t, pub)
+<span id="L125" class="ln">   125  </span>
+<span id="L126" class="ln">   126  </span>	<span class="comment">// check that files were correctly created</span>
+<span id="L127" class="ln">   127  </span>	_, err1 := os.Stat(priv)
+<span id="L128" class="ln">   128  </span>	_, err2 := os.Stat(pub)
+<span id="L129" class="ln">   129  </span>	assert.NoError(t, err1, &#34;should create a private key file&#34;)
+<span id="L130" class="ln">   130  </span>	assert.NoError(t, err2, &#34;should create a public key file&#34;)
+<span id="L131" class="ln">   131  </span>
+<span id="L132" class="ln">   132  </span>	<span class="comment">// check that identity can be opened/unlocked</span>
+<span id="L133" class="ln">   133  </span>	id := NewIdentity(priv, pw)
+<span id="L134" class="ln">   134  </span>	pbz, err3 := id.Open()
+<span id="L135" class="ln">   135  </span>	pk, err4 := id.Identity().PubKey()
+<span id="L136" class="ln">   136  </span>	assert.NoError(t, err3, &#34;should be able to decrypt identity file&#34;)
+<span id="L137" class="ln">   137  </span>	assert.NoError(t, err4, &#34;should be able to read public key&#34;)
+<span id="L138" class="ln">   138  </span>	assert.Len(t, pbz, 64) <span class="comment">// ed25519 private key</span>
+<span id="L139" class="ln">   139  </span>	assert.Len(t, pk, 32)  <span class="comment">// ed25519 public key</span>
+<span id="L140" class="ln">   140  </span>
+<span id="L141" class="ln">   141  </span>	<span class="comment">// ed25519 private key contains compressed pubkey bytes (32)</span>
+<span id="L142" class="ln">   142  </span>	assert.Contains(t, string(pbz), string(pk.Bytes()))
+<span id="L143" class="ln">   143  </span>}
+<span id="L144" class="ln">   144  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.22.3.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

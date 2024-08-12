@@ -1,0 +1,429 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/securesharelabs/vstore/vfs/crypto.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/vfs">vfs</a>/<span class="text-muted">crypto.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/vfs">github.com/securesharelabs/vstore/vfs</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package vfs
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;bytes&#34;
+<span id="L5" class="ln">     5  </span>	&#34;crypto/aes&#34;
+<span id="L6" class="ln">     6  </span>	&#34;crypto/cipher&#34;
+<span id="L7" class="ln">     7  </span>	&#34;crypto/rand&#34;
+<span id="L8" class="ln">     8  </span>	&#34;encoding/base64&#34;
+<span id="L9" class="ln">     9  </span>	&#34;errors&#34;
+<span id="L10" class="ln">    10  </span>	&#34;fmt&#34;
+<span id="L11" class="ln">    11  </span>	&#34;io&#34;
+<span id="L12" class="ln">    12  </span>	&#34;os&#34;
+<span id="L13" class="ln">    13  </span>	&#34;path/filepath&#34;
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span>	&#34;github.com/cometbft/cometbft/crypto&#34;
+<span id="L16" class="ln">    16  </span>	&#34;github.com/cometbft/cometbft/crypto/ed25519&#34;
+<span id="L17" class="ln">    17  </span>	&#34;github.com/cometbft/cometbft/crypto/tmhash&#34;
+<span id="L18" class="ln">    18  </span>)
+<span id="L19" class="ln">    19  </span>
+<span id="L20" class="ln">    20  </span><span class="comment">// SecretProvider describes a provider that returns an AES-256 secret which</span>
+<span id="L21" class="ln">    21  </span><span class="comment">// is used to encrypt an ed25519 identity (private key).</span>
+<span id="L22" class="ln">    22  </span>type SecretProvider interface {
+<span id="L23" class="ln">    23  </span>	<span class="comment">// Bytes returns the raw bytes of a secret provider which include the random</span>
+<span id="L24" class="ln">    24  </span>	<span class="comment">// salt (8 bytes) used for encryption and the private key (64 bytes)</span>
+<span id="L25" class="ln">    25  </span>	<span class="comment">// Note: This function does not decrypt the AES encrypted private key.</span>
+<span id="L26" class="ln">    26  </span>	Bytes() ([]byte, error)
+<span id="L27" class="ln">    27  </span>
+<span id="L28" class="ln">    28  </span>	<span class="comment">// Open returns the bytes of the private key (64-bytes)</span>
+<span id="L29" class="ln">    29  </span>	<span class="comment">// This method shall decrypt the AES encrypted private key.</span>
+<span id="L30" class="ln">    30  </span>	Open() ([]byte, error)
+<span id="L31" class="ln">    31  </span>
+<span id="L32" class="ln">    32  </span>	<span class="comment">// Secret returns the 32-bytes secret used for encryption of the private key.</span>
+<span id="L33" class="ln">    33  </span>	<span class="comment">// This is the secret used to encrypt the contents of an identity file.</span>
+<span id="L34" class="ln">    34  </span>	Secret() ([]byte, error)
+<span id="L35" class="ln">    35  </span>
+<span id="L36" class="ln">    36  </span>	<span class="comment">// Identity returns a ed25519 identity which is used to encrypt the database.</span>
+<span id="L37" class="ln">    37  </span>	Identity() IdentitySecretProvider
+<span id="L38" class="ln">    38  </span>}
+<span id="L39" class="ln">    39  </span>
+<span id="L40" class="ln">    40  </span><span class="comment">// IdentitySecretProvider describes a provider that returns an AES-256 secret</span>
+<span id="L41" class="ln">    41  </span><span class="comment">// which is used to encrypt the database.</span>
+<span id="L42" class="ln">    42  </span>type IdentitySecretProvider interface {
+<span id="L43" class="ln">    43  </span>	<span class="comment">// Secret returns the 32-bytes secret used for encryption of data.</span>
+<span id="L44" class="ln">    44  </span>	<span class="comment">// This is the secret used to encrypt the contents of the database.</span>
+<span id="L45" class="ln">    45  </span>	Secret() ([]byte, error)
+<span id="L46" class="ln">    46  </span>
+<span id="L47" class="ln">    47  </span>	<span class="comment">// PrivKey returns a ed25519 private key instance.</span>
+<span id="L48" class="ln">    48  </span>	PrivKey() (ed25519.PrivKey, error)
+<span id="L49" class="ln">    49  </span>
+<span id="L50" class="ln">    50  </span>	<span class="comment">// PubKey returns a ed25519 public key from the private key.</span>
+<span id="L51" class="ln">    51  </span>	PubKey() (crypto.PubKey, error)
+<span id="L52" class="ln">    52  </span>}
+<span id="L53" class="ln">    53  </span>
+<span id="L54" class="ln">    54  </span><span class="comment">// identityFile is a private structure that describes a password-protected</span>
+<span id="L55" class="ln">    55  </span><span class="comment">// identity file. The identity file is expected to contain a base64-encoded</span>
+<span id="L56" class="ln">    56  </span><span class="comment">// AES-256 ciphertext prepended by an 8-bytes salt. The private key can be</span>
+<span id="L57" class="ln">    57  </span><span class="comment">// accessed only using the Identity() method and SecretIdentity interface.</span>
+<span id="L58" class="ln">    58  </span><span class="comment">// The file must be accessible.</span>
+<span id="L59" class="ln">    59  </span>type identityFile struct {
+<span id="L60" class="ln">    60  </span>	Path string
+<span id="L61" class="ln">    61  </span>	pw   []byte
+<span id="L62" class="ln">    62  </span>}
+<span id="L63" class="ln">    63  </span>
+<span id="L64" class="ln">    64  </span><span class="comment">// ed25519Identity is a byte slice that describes a ed25519 private key.</span>
+<span id="L65" class="ln">    65  </span><span class="comment">// Note: Ed25519 private keys contain the compressed public key as well.</span>
+<span id="L66" class="ln">    66  </span>type ed25519Identity []byte
+<span id="L67" class="ln">    67  </span>
+<span id="L68" class="ln">    68  </span><span class="comment">// Type assertion to ensure the struct can be used to decrypt a ed25519 private key.</span>
+<span id="L69" class="ln">    69  </span>var _ SecretProvider = (*identityFile)(nil)
+<span id="L70" class="ln">    70  </span>
+<span id="L71" class="ln">    71  </span><span class="comment">// Type assertion to ensure the struct can be used to create a secret from private key.</span>
+<span id="L72" class="ln">    72  </span>var _ IdentitySecretProvider = (*ed25519Identity)(nil)
+<span id="L73" class="ln">    73  </span>
+<span id="L74" class="ln">    74  </span><span class="comment">// NewIdentity creates a new identityFile instance</span>
+<span id="L75" class="ln">    75  </span>func NewIdentity(file string, pw []byte) *identityFile {
+<span id="L76" class="ln">    76  </span>	if len(pw) == 0 {
+<span id="L77" class="ln">    77  </span>		panic(&#34;password must not be empty&#34;)
+<span id="L78" class="ln">    78  </span>	}
+<span id="L79" class="ln">    79  </span>
+<span id="L80" class="ln">    80  </span>	if _, err := os.Stat(file); err != nil {
+<span id="L81" class="ln">    81  </span>		panic(fmt.Sprintf(&#34;could not open id file: %v&#34;, err))
+<span id="L82" class="ln">    82  </span>	}
+<span id="L83" class="ln">    83  </span>
+<span id="L84" class="ln">    84  </span>	return &amp;identityFile{
+<span id="L85" class="ln">    85  </span>		Path: file,
+<span id="L86" class="ln">    86  </span>		pw:   pw,
+<span id="L87" class="ln">    87  </span>	}
+<span id="L88" class="ln">    88  </span>}
+<span id="L89" class="ln">    89  </span>
+<span id="L90" class="ln">    90  </span><span class="comment">// --------------------------------------------------------------------------</span>
+<span id="L91" class="ln">    91  </span><span class="comment">// identityFile implements SecretProvider</span>
+<span id="L92" class="ln">    92  </span>
+<span id="L93" class="ln">    93  </span><span class="comment">// Bytes opens an identity file and expects it to contain a base64-encoded</span>
+<span id="L94" class="ln">    94  </span><span class="comment">// content which is decoded and returned. The file must be accessible.</span>
+<span id="L95" class="ln">    95  </span><span class="comment">// Bytes implements SecretProvider</span>
+<span id="L96" class="ln">    96  </span>func (id identityFile) Bytes() ([]byte, error) {
+<span id="L97" class="ln">    97  </span>	<span class="comment">// First assess access to identity file</span>
+<span id="L98" class="ln">    98  </span>	if _, err := os.Stat(id.Path); err != nil {
+<span id="L99" class="ln">    99  </span>		return []byte{}, fmt.Errorf(&#34;could not open id file: %v&#34;, err)
+<span id="L100" class="ln">   100  </span>	}
+<span id="L101" class="ln">   101  </span>
+<span id="L102" class="ln">   102  </span>	<span class="comment">// Read the base64-encoded file content</span>
+<span id="L103" class="ln">   103  </span>	ctbz, err := os.ReadFile(id.Path)
+<span id="L104" class="ln">   104  </span>	if err != nil {
+<span id="L105" class="ln">   105  </span>		return []byte{}, err
+<span id="L106" class="ln">   106  </span>	}
+<span id="L107" class="ln">   107  </span>
+<span id="L108" class="ln">   108  </span>	<span class="comment">// Decode base64 encoded file content</span>
+<span id="L109" class="ln">   109  </span>	ctbz, err = base64.StdEncoding.DecodeString(string(ctbz))
+<span id="L110" class="ln">   110  </span>	if err != nil {
+<span id="L111" class="ln">   111  </span>		return []byte{}, err
+<span id="L112" class="ln">   112  </span>	}
+<span id="L113" class="ln">   113  </span>
+<span id="L114" class="ln">   114  </span>	return ctbz, nil
+<span id="L115" class="ln">   115  </span>}
+<span id="L116" class="ln">   116  </span>
+<span id="L117" class="ln">   117  </span><span class="comment">// Open reads an AES encrypted file (base64-encoded) and decrypts</span>
+<span id="L118" class="ln">   118  </span><span class="comment">// its content using a salted password hash. This function expects</span>
+<span id="L119" class="ln">   119  </span><span class="comment">// the random salt to be prepended to the ciphertext (8 bytes).</span>
+<span id="L120" class="ln">   120  </span><span class="comment">// Open implements SecretProvider</span>
+<span id="L121" class="ln">   121  </span>func (id identityFile) Open() ([]byte, error) {
+<span id="L122" class="ln">   122  </span>	if len(id.pw) == 0 {
+<span id="L123" class="ln">   123  </span>		return []byte{}, errors.New(&#34;password must not be empty&#34;)
+<span id="L124" class="ln">   124  </span>	}
+<span id="L125" class="ln">   125  </span>
+<span id="L126" class="ln">   126  </span>	<span class="comment">// Read the AES ciphertext bytes from file</span>
+<span id="L127" class="ln">   127  </span>	<span class="comment">// Note: the first 8-bytes contain the random salt</span>
+<span id="L128" class="ln">   128  </span>	ctbz, err := id.Bytes()
+<span id="L129" class="ln">   129  </span>	if err != nil {
+<span id="L130" class="ln">   130  </span>		return []byte{}, err
+<span id="L131" class="ln">   131  </span>	}
+<span id="L132" class="ln">   132  </span>
+<span id="L133" class="ln">   133  </span>	<span class="comment">// Extract salt 8-bytes before ciphertext</span>
+<span id="L134" class="ln">   134  </span>	salt, ctbz := ctbz[:8], ctbz[8:]
+<span id="L135" class="ln">   135  </span>
+<span id="L136" class="ln">   136  </span>	<span class="comment">// Generate secret from password</span>
+<span id="L137" class="ln">   137  </span>	secret, _ := MustGenerateSecret(id.pw, salt)
+<span id="L138" class="ln">   138  </span>
+<span id="L139" class="ln">   139  </span>	<span class="comment">// Decrypt the ciphertext (private key bytes)</span>
+<span id="L140" class="ln">   140  </span>	pbz, err := Decrypt(secret, ctbz)
+<span id="L141" class="ln">   141  </span>	if err != nil {
+<span id="L142" class="ln">   142  </span>		return []byte{}, err
+<span id="L143" class="ln">   143  </span>	}
+<span id="L144" class="ln">   144  </span>
+<span id="L145" class="ln">   145  </span>	return pbz, nil
+<span id="L146" class="ln">   146  </span>}
+<span id="L147" class="ln">   147  </span>
+<span id="L148" class="ln">   148  </span><span class="comment">// Secret returns the 32-bytes secret generated as a SHA-256 hash using</span>
+<span id="L149" class="ln">   149  </span><span class="comment">// a salt (8 bytes) and a password. A salt is expected to be available as</span>
+<span id="L150" class="ln">   150  </span><span class="comment">// the first 8 bytes before the ciphertext returned with Bytes.</span>
+<span id="L151" class="ln">   151  </span><span class="comment">// Secret implement SecretProvider</span>
+<span id="L152" class="ln">   152  </span>func (id identityFile) Secret() ([]byte, error) {
+<span id="L153" class="ln">   153  </span>	<span class="comment">// Read content and base64-decode</span>
+<span id="L154" class="ln">   154  </span>	ctbz, err := id.Bytes()
+<span id="L155" class="ln">   155  </span>	if err != nil {
+<span id="L156" class="ln">   156  </span>		return []byte{}, err
+<span id="L157" class="ln">   157  </span>	}
+<span id="L158" class="ln">   158  </span>
+<span id="L159" class="ln">   159  </span>	<span class="comment">// Salt consists of 8 bytes prepended to ciphertext</span>
+<span id="L160" class="ln">   160  </span>	salt := ctbz[:8]
+<span id="L161" class="ln">   161  </span>
+<span id="L162" class="ln">   162  </span>	<span class="comment">// Generate the AES-compatible 32-bytes secret from password and salt</span>
+<span id="L163" class="ln">   163  </span>	secret, _, err := GenerateSecret(id.pw, salt)
+<span id="L164" class="ln">   164  </span>	if err != nil {
+<span id="L165" class="ln">   165  </span>		return []byte{}, err
+<span id="L166" class="ln">   166  </span>	}
+<span id="L167" class="ln">   167  </span>
+<span id="L168" class="ln">   168  </span>	return secret, nil
+<span id="L169" class="ln">   169  </span>}
+<span id="L170" class="ln">   170  </span>
+<span id="L171" class="ln">   171  </span><span class="comment">// Identity returns a ed25519Identity by opening the identity file and using</span>
+<span id="L172" class="ln">   172  </span><span class="comment">// the secret to decrypt the ed25519 private key.</span>
+<span id="L173" class="ln">   173  </span><span class="comment">// Identity implements SecretProvider</span>
+<span id="L174" class="ln">   174  </span>func (id identityFile) Identity() IdentitySecretProvider {
+<span id="L175" class="ln">   175  </span>	bz, err := id.Open()
+<span id="L176" class="ln">   176  </span>	if err != nil {
+<span id="L177" class="ln">   177  </span>		panic(err.Error())
+<span id="L178" class="ln">   178  </span>	}
+<span id="L179" class="ln">   179  </span>
+<span id="L180" class="ln">   180  </span>	return ed25519Identity(bz)
+<span id="L181" class="ln">   181  </span>}
+<span id="L182" class="ln">   182  </span>
+<span id="L183" class="ln">   183  </span><span class="comment">// --------------------------------------------------------------------------</span>
+<span id="L184" class="ln">   184  </span><span class="comment">// ed25519Identity implements IdentitySecretProvider</span>
+<span id="L185" class="ln">   185  </span>
+<span id="L186" class="ln">   186  </span><span class="comment">// Secret implements IdentitySecretProvider</span>
+<span id="L187" class="ln">   187  </span>func (id ed25519Identity) Secret() ([]byte, error) {
+<span id="L188" class="ln">   188  </span>	<span class="comment">// salt is first 8 bytes of private key</span>
+<span id="L189" class="ln">   189  </span>	salt := []byte(id)[:8]
+<span id="L190" class="ln">   190  </span>
+<span id="L191" class="ln">   191  </span>	<span class="comment">// Generate the AES-compatible 32-bytes secret from private key</span>
+<span id="L192" class="ln">   192  </span>	secret, _, err := GenerateSecret([]byte(id), salt)
+<span id="L193" class="ln">   193  </span>	if err != nil {
+<span id="L194" class="ln">   194  </span>		return []byte{}, err
+<span id="L195" class="ln">   195  </span>	}
+<span id="L196" class="ln">   196  </span>
+<span id="L197" class="ln">   197  </span>	return secret, nil
+<span id="L198" class="ln">   198  </span>}
+<span id="L199" class="ln">   199  </span>
+<span id="L200" class="ln">   200  </span><span class="comment">// PrivKey opens an identity file and creates a private key instance. It is</span>
+<span id="L201" class="ln">   201  </span><span class="comment">// recommended to clear this private key instance after you have used it.</span>
+<span id="L202" class="ln">   202  </span><span class="comment">// This function always opens and decrypts the identity file to avoid saving</span>
+<span id="L203" class="ln">   203  </span><span class="comment">// the plaintext content - i.e. the private key - in memory (of the instance).</span>
+<span id="L204" class="ln">   204  </span><span class="comment">// PrivKey implements IdentitySecretProvider</span>
+<span id="L205" class="ln">   205  </span>func (id ed25519Identity) PrivKey() (ed25519.PrivKey, error) {
+<span id="L206" class="ln">   206  </span>	return ed25519.PrivKey([]byte(id)), nil
+<span id="L207" class="ln">   207  </span>}
+<span id="L208" class="ln">   208  </span>
+<span id="L209" class="ln">   209  </span><span class="comment">// PubKey implements IdentitySecretProvider</span>
+<span id="L210" class="ln">   210  </span>func (id ed25519Identity) PubKey() (crypto.PubKey, error) {
+<span id="L211" class="ln">   211  </span>	priv, err := id.PrivKey()
+<span id="L212" class="ln">   212  </span>	if err != nil {
+<span id="L213" class="ln">   213  </span>		return nil, err
+<span id="L214" class="ln">   214  </span>	}
+<span id="L215" class="ln">   215  </span>
+<span id="L216" class="ln">   216  </span>	return priv.PubKey(), nil
+<span id="L217" class="ln">   217  </span>}
+<span id="L218" class="ln">   218  </span>
+<span id="L219" class="ln">   219  </span><span class="comment">// --------------------------------------------------------------------------</span>
+<span id="L220" class="ln">   220  </span><span class="comment">// Helpers</span>
+<span id="L221" class="ln">   221  </span>
+<span id="L222" class="ln">   222  </span><span class="comment">// GenerateSecret generates a 32-bytes secret by creating a SHA-256</span>
+<span id="L223" class="ln">   223  </span><span class="comment">// hash of a salted password using a random salt of 8-bytes. If a non-empty</span>
+<span id="L224" class="ln">   224  </span><span class="comment">// salt is provided, it is expected to be of 8-bytes length.</span>
+<span id="L225" class="ln">   225  </span><span class="comment">// It returns the 32-bytes secret and an 8-bytes salt.</span>
+<span id="L226" class="ln">   226  </span>func GenerateSecret(pw, salt []byte) ([]byte, []byte, error) {
+<span id="L227" class="ln">   227  </span>	if len(pw) == 0 {
+<span id="L228" class="ln">   228  </span>		return []byte{}, []byte{}, errors.New(&#34;password must not be empty&#34;)
+<span id="L229" class="ln">   229  </span>	}
+<span id="L230" class="ln">   230  </span>
+<span id="L231" class="ln">   231  </span>	if len(salt) == 0 {
+<span id="L232" class="ln">   232  </span>		<span class="comment">// Generate random 8-bytes salt</span>
+<span id="L233" class="ln">   233  </span>		salt = make([]byte, 8)
+<span id="L234" class="ln">   234  </span>		if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+<span id="L235" class="ln">   235  </span>			return []byte{}, []byte{}, err
+<span id="L236" class="ln">   236  </span>		}
+<span id="L237" class="ln">   237  </span>	} else if len(salt) != 8 {
+<span id="L238" class="ln">   238  </span>		return []byte{}, []byte{}, fmt.Errorf(&#34;invalid salt size, want: %d, got: %d&#34;, 8, len(salt))
+<span id="L239" class="ln">   239  </span>	}
+<span id="L240" class="ln">   240  </span>
+<span id="L241" class="ln">   241  </span>	<span class="comment">// Secret is: SHA256(salt || password)</span>
+<span id="L242" class="ln">   242  </span>	var sbuf bytes.Buffer
+<span id="L243" class="ln">   243  </span>	sbuf.Grow(8 + len(pw))
+<span id="L244" class="ln">   244  </span>	sbuf.Write(salt) <span class="comment">// 8-bytes salt</span>
+<span id="L245" class="ln">   245  </span>	sbuf.Write(pw)   <span class="comment">// password</span>
+<span id="L246" class="ln">   246  </span>	secret := tmhash.Sum(sbuf.Bytes())
+<span id="L247" class="ln">   247  </span>
+<span id="L248" class="ln">   248  </span>	return secret, salt, nil
+<span id="L249" class="ln">   249  </span>}
+<span id="L250" class="ln">   250  </span>
+<span id="L251" class="ln">   251  </span><span class="comment">// Encrypt encrypts a plaintext using the secret with the AES block cipher algo.</span>
+<span id="L252" class="ln">   252  </span>func Encrypt(secret []byte, data []byte) ([]byte, error) {
+<span id="L253" class="ln">   253  </span>	<span class="comment">// Prepare AES block cipher</span>
+<span id="L254" class="ln">   254  </span>	block, err := aes.NewCipher(secret)
+<span id="L255" class="ln">   255  </span>	if err != nil {
+<span id="L256" class="ln">   256  </span>		return []byte{}, err
+<span id="L257" class="ln">   257  </span>	}
+<span id="L258" class="ln">   258  </span>
+<span id="L259" class="ln">   259  </span>	gcm, err := cipher.NewGCM(block)
+<span id="L260" class="ln">   260  </span>	if err != nil {
+<span id="L261" class="ln">   261  </span>		return []byte{}, err
+<span id="L262" class="ln">   262  </span>	}
+<span id="L263" class="ln">   263  </span>
+<span id="L264" class="ln">   264  </span>	<span class="comment">// Generate random salt</span>
+<span id="L265" class="ln">   265  </span>	salt := make([]byte, gcm.NonceSize())
+<span id="L266" class="ln">   266  </span>	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+<span id="L267" class="ln">   267  </span>		return []byte{}, err
+<span id="L268" class="ln">   268  </span>	}
+<span id="L269" class="ln">   269  </span>
+<span id="L270" class="ln">   270  </span>	<span class="comment">// Encrypt private key using AES and store base64</span>
+<span id="L271" class="ln">   271  </span>	ctbz := gcm.Seal(salt, salt, data, nil)
+<span id="L272" class="ln">   272  </span>	return ctbz, nil
+<span id="L273" class="ln">   273  </span>}
+<span id="L274" class="ln">   274  </span>
+<span id="L275" class="ln">   275  </span><span class="comment">// Decrypt decrypts a ciphertext using the secret with the AES block cipher algo.</span>
+<span id="L276" class="ln">   276  </span>func Decrypt(secret []byte, ciphertext []byte) ([]byte, error) {
+<span id="L277" class="ln">   277  </span>	<span class="comment">// Prepare AES block cipher</span>
+<span id="L278" class="ln">   278  </span>	block, err := aes.NewCipher(secret)
+<span id="L279" class="ln">   279  </span>	if err != nil {
+<span id="L280" class="ln">   280  </span>		return []byte{}, err
+<span id="L281" class="ln">   281  </span>	}
+<span id="L282" class="ln">   282  </span>
+<span id="L283" class="ln">   283  </span>	gcm, err := cipher.NewGCM(block)
+<span id="L284" class="ln">   284  </span>	if err != nil {
+<span id="L285" class="ln">   285  </span>		return []byte{}, err
+<span id="L286" class="ln">   286  </span>	}
+<span id="L287" class="ln">   287  </span>
+<span id="L288" class="ln">   288  </span>	saltSize := gcm.NonceSize()
+<span id="L289" class="ln">   289  </span>	salt, ct := ciphertext[:saltSize], ciphertext[saltSize:]
+<span id="L290" class="ln">   290  </span>
+<span id="L291" class="ln">   291  </span>	bz, err := gcm.Open(nil, salt, ct, nil)
+<span id="L292" class="ln">   292  </span>	if err != nil {
+<span id="L293" class="ln">   293  </span>		return []byte{}, err
+<span id="L294" class="ln">   294  </span>	}
+<span id="L295" class="ln">   295  </span>
+<span id="L296" class="ln">   296  </span>	return bz, nil
+<span id="L297" class="ln">   297  </span>}
+<span id="L298" class="ln">   298  </span>
+<span id="L299" class="ln">   299  </span><span class="comment">// MustGenerateIdentity generates a new ed25519 private key and saves it to</span>
+<span id="L300" class="ln">   300  </span><span class="comment">// the provided idFile file. A password pw is used to encrypt the private key.</span>
+<span id="L301" class="ln">   301  </span><span class="comment">// 8 bytes are added in front of the ciphertext which consist of a random salt.</span>
+<span id="L302" class="ln">   302  </span><span class="comment">// The created identity file contains a base64-encoded AES ciphertext prefixed</span>
+<span id="L303" class="ln">   303  </span><span class="comment">// with a random salt of 8 bytes.</span>
+<span id="L304" class="ln">   304  </span><span class="comment">// This function will panic if any errors occur.</span>
+<span id="L305" class="ln">   305  </span>func MustGenerateIdentity(idFile string, pw []byte) (string, string) {
+<span id="L306" class="ln">   306  </span>	if len(pw) == 0 {
+<span id="L307" class="ln">   307  </span>		panic(&#34;password must not be empty&#34;)
+<span id="L308" class="ln">   308  </span>	}
+<span id="L309" class="ln">   309  </span>
+<span id="L310" class="ln">   310  </span>	idDir := filepath.Dir(idFile)
+<span id="L311" class="ln">   311  </span>	if _, err := os.Stat(idDir); err != nil {
+<span id="L312" class="ln">   312  </span>		os.MkdirAll(idDir, 0700)
+<span id="L313" class="ln">   313  </span>	}
+<span id="L314" class="ln">   314  </span>
+<span id="L315" class="ln">   315  </span>	<span class="comment">// Generate ed25519 private key</span>
+<span id="L316" class="ln">   316  </span>	priv := ed25519.GenPrivKey()
+<span id="L317" class="ln">   317  </span>
+<span id="L318" class="ln">   318  </span>	<span class="comment">// Generate random salt and 32-bytes secret for AES</span>
+<span id="L319" class="ln">   319  </span>	secret, salt := MustGenerateSecret(pw, []byte{}) <span class="comment">// random salt</span>
+<span id="L320" class="ln">   320  </span>
+<span id="L321" class="ln">   321  </span>	<span class="comment">// Encrypt the private key using AES</span>
+<span id="L322" class="ln">   322  </span>	ctbz, err := Encrypt(secret, priv.Bytes())
+<span id="L323" class="ln">   323  </span>	if err != nil {
+<span id="L324" class="ln">   324  </span>		panic(err.Error())
+<span id="L325" class="ln">   325  </span>	}
+<span id="L326" class="ln">   326  </span>
+<span id="L327" class="ln">   327  </span>	<span class="comment">// Salt is added in front of ciphertext (starting 8-bytes)</span>
+<span id="L328" class="ln">   328  </span>	<span class="comment">// The salt must be in plaintext to decrypt with the password.</span>
+<span id="L329" class="ln">   329  </span>	ctbz = append(salt, ctbz...)
+<span id="L330" class="ln">   330  </span>
+<span id="L331" class="ln">   331  </span>	<span class="comment">// Write base64-encoded ciphertext to file</span>
+<span id="L332" class="ln">   332  </span>	b64 := base64.StdEncoding.EncodeToString(ctbz)
+<span id="L333" class="ln">   333  </span>	err = os.WriteFile(idFile, []byte(b64), 0600)
+<span id="L334" class="ln">   334  </span>	if err != nil {
+<span id="L335" class="ln">   335  </span>		panic(err.Error())
+<span id="L336" class="ln">   336  </span>	}
+<span id="L337" class="ln">   337  </span>
+<span id="L338" class="ln">   338  </span>	<span class="comment">// Also *always* create a (cleartext) co-located .pub file</span>
+<span id="L339" class="ln">   339  </span>	pubFile := idFile + &#34;.pub&#34;
+<span id="L340" class="ln">   340  </span>	b64_pub := base64.StdEncoding.EncodeToString(priv.PubKey().Bytes())
+<span id="L341" class="ln">   341  </span>	err = os.WriteFile(pubFile, []byte(b64_pub), 0644)
+<span id="L342" class="ln">   342  </span>	if err != nil {
+<span id="L343" class="ln">   343  </span>		panic(err.Error())
+<span id="L344" class="ln">   344  </span>	}
+<span id="L345" class="ln">   345  </span>
+<span id="L346" class="ln">   346  </span>	<span class="comment">// Returns pair of co-located files</span>
+<span id="L347" class="ln">   347  </span>	return idFile, pubFile
+<span id="L348" class="ln">   348  </span>}
+<span id="L349" class="ln">   349  </span>
+<span id="L350" class="ln">   350  </span><span class="comment">// MustGenerateSecret generates a 32-bytes secret with salt or panics.</span>
+<span id="L351" class="ln">   351  </span><span class="comment">// This function will panic if any errors occur.</span>
+<span id="L352" class="ln">   352  </span>func MustGenerateSecret(pw, salt []byte) ([]byte, []byte) {
+<span id="L353" class="ln">   353  </span>	<span class="comment">// Secret is: SHA256(salt || password)</span>
+<span id="L354" class="ln">   354  </span>	secret, salt, err := GenerateSecret(pw, salt)
+<span id="L355" class="ln">   355  </span>	if err != nil {
+<span id="L356" class="ln">   356  </span>		panic(err.Error())
+<span id="L357" class="ln">   357  </span>	}
+<span id="L358" class="ln">   358  </span>
+<span id="L359" class="ln">   359  </span>	return secret, salt
+<span id="L360" class="ln">   360  </span>}
+<span id="L361" class="ln">   361  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.22.3.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

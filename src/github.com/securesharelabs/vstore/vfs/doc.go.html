@@ -1,0 +1,85 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/securesharelabs/vstore/vfs/doc.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/vfs">vfs</a>/<span class="text-muted">doc.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/vfs">github.com/securesharelabs/vstore/vfs</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">/*
+<span id="L2" class="ln">     2  </span>Package vfs implements a verifiable store for CometBFT nodes.
+<span id="L3" class="ln">     3  </span>
+<span id="L4" class="ln">     4  </span>vfs defines key components for the establishment of a secure data communication
+<span id="L5" class="ln">     5  </span>protocol which is based on digital signatures with ed25519 elliptic-curve.
+<span id="L6" class="ln">     6  </span>
+<span id="L7" class="ln">     7  </span># Structures
+<span id="L8" class="ln">     8  </span>
+<span id="L9" class="ln">     9  </span>  - [IdentitySecretProvider]: Creates AES-256 secrets used to encrypt the database.
+<span id="L10" class="ln">    10  </span>  - [SecretProvider]: Creates AES-256 secrets used to encrypt private keys.
+<span id="L11" class="ln">    11  </span>  - [Signable]: Interfaces that describes data to be signed using an ed25519 private key.
+<span id="L12" class="ln">    12  </span>  - [SignedTransaction]: Describes a signed data object that is timestamped.
+<span id="L13" class="ln">    13  </span>  - [State]: Consists of a blockchain height, a number of transactions and merkle roots.
+<span id="L14" class="ln">    14  </span>  - [VStoreApplication]: A CometBFT ABCI application to run on top of CometBFT nodes.
+<span id="L15" class="ln">    15  </span>*/</span>
+<span id="L16" class="ln">    16  </span>package vfs
+<span id="L17" class="ln">    17  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.22.3.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

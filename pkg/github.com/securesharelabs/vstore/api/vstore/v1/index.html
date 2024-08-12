@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>v1 - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer></script>
+
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package v1
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/securesharelabs/vstore/api/vstore/v1"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="#pkg-variables">Variables</a></dd>
+			
+			
+			
+				
+				<dd><a href="#Transaction">type Transaction</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.Descriptor">func (*Transaction) Descriptor() ([]byte, []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.GetBody">func (m *Transaction) GetBody() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.GetHash">func (m *Transaction) GetHash() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.GetLen">func (m *Transaction) GetLen() uint32</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.GetSignature">func (m *Transaction) GetSignature() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.GetSigner">func (m *Transaction) GetSigner() v1.PublicKey</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.GetTime">func (m *Transaction) GetTime() time.Time</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.Marshal">func (m *Transaction) Marshal() (dAtA []byte, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.MarshalTo">func (m *Transaction) MarshalTo(dAtA []byte) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.MarshalToSizedBuffer">func (m *Transaction) MarshalToSizedBuffer(dAtA []byte) (int, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.ProtoMessage">func (*Transaction) ProtoMessage()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.Reset">func (m *Transaction) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.Size">func (m *Transaction) Size() (n int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.String">func (m *Transaction) String() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.Unmarshal">func (m *Transaction) Unmarshal(dAtA []byte) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.XXX_DiscardUnknown">func (m *Transaction) XXX_DiscardUnknown()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.XXX_Marshal">func (m *Transaction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.XXX_Merge">func (m *Transaction) XXX_Merge(src proto.Message)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.XXX_Size">func (m *Transaction) XXX_Size() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Transaction.XXX_Unmarshal">func (m *Transaction) XXX_Unmarshal(b []byte) error</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html">types.pb.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				
+				<pre>var (
+    <span id="ErrInvalidLengthTypes">ErrInvalidLengthTypes</span>        = <a href="https://pkg.go.dev/fmt/">fmt</a>.<a href="https://pkg.go.dev/fmt/#Errorf">Errorf</a>(&#34;proto: negative length found during unmarshaling&#34;)
+    <span id="ErrIntOverflowTypes">ErrIntOverflowTypes</span>          = <a href="https://pkg.go.dev/fmt/">fmt</a>.<a href="https://pkg.go.dev/fmt/#Errorf">Errorf</a>(&#34;proto: integer overflow&#34;)
+    <span id="ErrUnexpectedEndOfGroupTypes">ErrUnexpectedEndOfGroupTypes</span> = <a href="https://pkg.go.dev/fmt/">fmt</a>.<a href="https://pkg.go.dev/fmt/#Errorf">Errorf</a>(&#34;proto: unexpected end of group&#34;)
+)</pre>
+			
+		
+		
+		
+			
+			
+			<h2 id="Transaction">type <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L33">Transaction</a>
+				<a class="permalink" href="#Transaction">&#xb6;</a>
+				
+				
+			</h2>
+			<p>Transaction represents a transportable data payload.
+Transactions always contain a signer and a signature.
+
+			<pre>type Transaction struct {
+    <span class="comment">// Contains the signer public key and its type (32+1 bytes)</span>
+<span id="Transaction.Signer"></span>    Signer <a href="https://pkg.go.dev/github.com/cometbft/cometbft/api/cometbft/crypto/v1/">v1</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/api/cometbft/crypto/v1/#PublicKey">PublicKey</a> `protobuf:&#34;bytes,1,opt,name=signer,proto3&#34; json:&#34;signer&#34;`
+    <span class="comment">// Contains the signature of body (64 bytes)</span>
+<span id="Transaction.Signature"></span>    Signature []<a href="https://pkg.go.dev/builtin/#byte">byte</a> `protobuf:&#34;bytes,2,opt,name=signature,proto3&#34; json:&#34;signature,omitempty&#34;`
+    <span class="comment">// Contains the transaction hash (32 bytes)</span>
+<span id="Transaction.Hash"></span>    Hash []<a href="https://pkg.go.dev/builtin/#byte">byte</a> `protobuf:&#34;bytes,3,opt,name=hash,proto3&#34; json:&#34;hash,omitempty&#34;`
+    <span class="comment">// Contains the transaction timestamp</span>
+<span id="Transaction.Time"></span>    Time <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a> `protobuf:&#34;bytes,4,opt,name=time,proto3,stdtime&#34; json:&#34;time&#34;`
+    <span class="comment">// Contains the size of body (&#34;Size&#34; is reserved)</span>
+<span id="Transaction.Len"></span>    Len <a href="https://pkg.go.dev/builtin/#uint32">uint32</a> `protobuf:&#34;varint,5,opt,name=len,proto3&#34; json:&#34;len,omitempty&#34;`
+    <span class="comment">// Contains the transaction body (arbitrary length)</span>
+<span id="Transaction.Body"></span>    Body []<a href="https://pkg.go.dev/builtin/#byte">byte</a> `protobuf:&#34;bytes,6,opt,name=body,proto3&#34; json:&#34;body,omitempty&#34;`
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Transaction.Descriptor">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L51">Descriptor</a>
+					<a class="permalink" href="#Transaction.Descriptor">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="#Transaction">Transaction</a>) Descriptor() ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, []<a href="https://pkg.go.dev/builtin/#int">int</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.GetBody">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L116">GetBody</a>
+					<a class="permalink" href="#Transaction.GetBody">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) GetBody() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.GetHash">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L95">GetHash</a>
+					<a class="permalink" href="#Transaction.GetHash">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) GetHash() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.GetLen">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L109">GetLen</a>
+					<a class="permalink" href="#Transaction.GetLen">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) GetLen() <a href="https://pkg.go.dev/builtin/#uint32">uint32</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.GetSignature">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L88">GetSignature</a>
+					<a class="permalink" href="#Transaction.GetSignature">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) GetSignature() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.GetSigner">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L81">GetSigner</a>
+					<a class="permalink" href="#Transaction.GetSigner">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) GetSigner() <a href="https://pkg.go.dev/github.com/cometbft/cometbft/api/cometbft/crypto/v1/">v1</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/api/cometbft/crypto/v1/#PublicKey">PublicKey</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.GetTime">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L102">GetTime</a>
+					<a class="permalink" href="#Transaction.GetTime">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) GetTime() <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.Marshal">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L152">Marshal</a>
+					<a class="permalink" href="#Transaction.Marshal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) Marshal() (dAtA []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.MarshalTo">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L162">MarshalTo</a>
+					<a class="permalink" href="#Transaction.MarshalTo">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) MarshalTo(dAtA []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (<a href="https://pkg.go.dev/builtin/#int">int</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.MarshalToSizedBuffer">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L167">MarshalToSizedBuffer</a>
+					<a class="permalink" href="#Transaction.MarshalToSizedBuffer">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) MarshalToSizedBuffer(dAtA []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (<a href="https://pkg.go.dev/builtin/#int">int</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.ProtoMessage">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L50">ProtoMessage</a>
+					<a class="permalink" href="#Transaction.ProtoMessage">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (*<a href="#Transaction">Transaction</a>) ProtoMessage()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.Reset">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L48">Reset</a>
+					<a class="permalink" href="#Transaction.Reset">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) Reset()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.Size">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L230">Size</a>
+					<a class="permalink" href="#Transaction.Size">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) Size() (n <a href="https://pkg.go.dev/builtin/#int">int</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.String">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L49">String</a>
+					<a class="permalink" href="#Transaction.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) String() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.Unmarshal">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L264">Unmarshal</a>
+					<a class="permalink" href="#Transaction.Unmarshal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) Unmarshal(dAtA []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.XXX_DiscardUnknown">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L75">XXX_DiscardUnknown</a>
+					<a class="permalink" href="#Transaction.XXX_DiscardUnknown">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) XXX_DiscardUnknown()</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.XXX_Marshal">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L57">XXX_Marshal</a>
+					<a class="permalink" href="#Transaction.XXX_Marshal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) XXX_Marshal(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, deterministic <a href="https://pkg.go.dev/builtin/#bool">bool</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.XXX_Merge">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L69">XXX_Merge</a>
+					<a class="permalink" href="#Transaction.XXX_Merge">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) XXX_Merge(src <a href="https://pkg.go.dev/github.com/cosmos/gogoproto/proto/">proto</a>.<a href="https://pkg.go.dev/github.com/cosmos/gogoproto/proto/#Message">Message</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.XXX_Size">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L72">XXX_Size</a>
+					<a class="permalink" href="#Transaction.XXX_Size">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) XXX_Size() <a href="https://pkg.go.dev/builtin/#int">int</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Transaction.XXX_Unmarshal">func (*Transaction) <a href="/src/github.com/securesharelabs/vstore/api/vstore/v1/types.pb.go.html#L54">XXX_Unmarshal</a>
+					<a class="permalink" href="#Transaction.XXX_Unmarshal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (m *<a href="#Transaction">Transaction</a>) XXX_Unmarshal(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.22.3.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>

@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>vfs - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer></script>
+
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package vfs
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/securesharelabs/vstore/vfs"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>Package vfs implements a verifiable store for CometBFT nodes.
+<p>vfs defines key components for the establishment of a secure data communication
+protocol which is based on digital signatures with ed25519 elliptic-curve.
+<h3 id="hdr-Structures">Structures</h3>
+<ul>
+<li><a href="#IdentitySecretProvider">IdentitySecretProvider</a>: Creates AES-256 secrets used to encrypt the database.
+<li><a href="#SecretProvider">SecretProvider</a>: Creates AES-256 secrets used to encrypt private keys.
+<li><a href="#Signable">Signable</a>: Interfaces that describes data to be signed using an ed25519 private key.
+<li><a href="#SignedTransaction">SignedTransaction</a>: Describes a signed data object that is timestamped.
+<li><a href="#State">State</a>: Consists of a blockchain height, a number of transactions and merkle roots.
+<li><a href="#VStoreApplication">VStoreApplication</a>: A CometBFT ABCI application to run on top of CometBFT nodes.
+</ul>
+
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="#ComputeHash">func ComputeHash(p *SignedTransaction) []byte</a></dd>
+			
+				
+				<dd><a href="#Decrypt">func Decrypt(secret []byte, ciphertext []byte) ([]byte, error)</a></dd>
+			
+				
+				<dd><a href="#Encrypt">func Encrypt(secret []byte, data []byte) ([]byte, error)</a></dd>
+			
+				
+				<dd><a href="#GenerateSecret">func GenerateSecret(pw, salt []byte) ([]byte, []byte, error)</a></dd>
+			
+				
+				<dd><a href="#MustGenerateIdentity">func MustGenerateIdentity(idFile string, pw []byte) (string, string)</a></dd>
+			
+				
+				<dd><a href="#MustGenerateSecret">func MustGenerateSecret(pw, salt []byte) ([]byte, []byte)</a></dd>
+			
+				
+				<dd><a href="#NewIdentity">func NewIdentity(file string, pw []byte) *identityFile</a></dd>
+			
+				
+				<dd><a href="#PubKeyToProto">func PubKeyToProto(pubKey crypto.PubKey) cmtp2p.PublicKey</a></dd>
+			
+				
+				<dd><a href="#SignData">func SignData(priv ed25519.PrivKey, tx Signable) []byte</a></dd>
+			
+			
+				
+				<dd><a href="#IdentitySecretProvider">type IdentitySecretProvider</a></dd>
+				
+				
+			
+				
+				<dd><a href="#SecretProvider">type SecretProvider</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Signable">type Signable</a></dd>
+				
+				
+			
+				
+				<dd><a href="#SignedTransaction">type SignedTransaction</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#FromBytes">func FromBytes(bz []byte) (*SignedTransaction, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#FromProto">func FromProto(pb *vfsp2p.Transaction) (*SignedTransaction, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewSignedTransactionFromBytes">func NewSignedTransactionFromBytes(tx []byte) (*SignedTransaction, error)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#SignedTransaction.Bytes">func (p SignedTransaction) Bytes() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#SignedTransaction.PublicKey">func (p SignedTransaction) PublicKey() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#SignedTransaction.ToProto">func (p SignedTransaction) ToProto() *vfsp2p.Transaction</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#SignedTransaction.Verify">func (p SignedTransaction) Verify() bool</a></dd>
+				
+			
+				
+				<dd><a href="#State">type State</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#State.Hash">func (s State) Hash() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#State.SortedMerkleRoots">func (s State) SortedMerkleRoots() [][]byte</a></dd>
+				
+			
+				
+				<dd><a href="#TransactionBody">type TransactionBody</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#TransactionBody.Bytes">func (p TransactionBody) Bytes() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#TransactionBody.Sign">func (p TransactionBody) Sign(priv ed25519.PrivKey) ([]byte, error)</a></dd>
+				
+			
+				
+				<dd><a href="#VStoreApplication">type VStoreApplication</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewInMemoryVStoreApplication">func NewInMemoryVStoreApplication(id_file string, password []byte) *VStoreApplication</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewVStoreApplication">func NewVStoreApplication(db cmtdb.DB, id_file string, password []byte) *VStoreApplication</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.CheckTx">func (app *VStoreApplication) CheckTx(_ context.Context, check *abci.RequestCheckTx) (*abci.ResponseCheckTx, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.Commit">func (app *VStoreApplication) Commit(_ context.Context, commit *abci.RequestCommit) (*abci.ResponseCommit, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.FinalizeBlock">func (app *VStoreApplication) FinalizeBlock(ctx context.Context, req *abci.RequestFinalizeBlock) (*abci.ResponseFinalizeBlock, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.Info">func (app *VStoreApplication) Info(_ context.Context, info *abci.RequestInfo) (*abci.ResponseInfo, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.InitChain">func (app *VStoreApplication) InitChain(_ context.Context, chain *abci.RequestInitChain) (*abci.ResponseInitChain, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.PrepareProposal">func (app *VStoreApplication) PrepareProposal(ctx context.Context, proposal *abci.RequestPrepareProposal) (*abci.ResponsePrepareProposal, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.ProcessProposal">func (app *VStoreApplication) ProcessProposal(ctx context.Context, proposal *abci.RequestProcessProposal) (*abci.ResponseProcessProposal, error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VStoreApplication.Query">func (app *VStoreApplication) Query(_ context.Context, req *abci.RequestQuery) (*abci.ResponseQuery, error)</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html">crypto.go</a>
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/doc.go.html">doc.go</a>
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/opcode.go.html">opcode.go</a>
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html">state.go</a>
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html">tx.go</a>
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html">tx_body.go</a>
+			
+				<a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html">vfs.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<p>Return codes for vfs application
+
+				<pre>const (
+    <span id="CodeTypeOK">CodeTypeOK</span>                    <a href="https://pkg.go.dev/builtin/#uint32">uint32</a> = 0
+    <span id="CodeTypeEmptyDataError">CodeTypeEmptyDataError</span>        <a href="https://pkg.go.dev/builtin/#uint32">uint32</a> = 1
+    <span id="CodeTypeInvalidFormatError">CodeTypeInvalidFormatError</span>    <a href="https://pkg.go.dev/builtin/#uint32">uint32</a> = 2
+    <span id="CodeTypeInvalidSignatureError">CodeTypeInvalidSignatureError</span> <a href="https://pkg.go.dev/builtin/#uint32">uint32</a> = 3
+)</pre>
+			
+				
+				<pre>const (
+    <span id="AppVersion">AppVersion</span>        <a href="https://pkg.go.dev/builtin/#uint64">uint64</a> = 1
+    <span id="QueryType_Default">QueryType_Default</span> <a href="https://pkg.go.dev/builtin/#string">string</a> = &#34;hash&#34;
+    <span id="QueryType_Height">QueryType_Height</span>  <a href="https://pkg.go.dev/builtin/#string">string</a> = &#34;height&#34;
+    <span id="QueryType_PubKey">QueryType_PubKey</span>  <a href="https://pkg.go.dev/builtin/#string">string</a> = &#34;pubkey&#34;
+)</pre>
+			
+		
+		
+		
+			
+			
+			<h2 id="ComputeHash">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L112">ComputeHash</a>
+				<a class="permalink" href="#ComputeHash">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func ComputeHash(p *<a href="#SignedTransaction">SignedTransaction</a>) []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+			<p>ComputeHash computes the SHA256 hash of a signed transaction
+The transaction hash consists of a SHA256 of the signer public key,
+followed by the data and the attached timestamp bytes.
+
+			
+			
+
+		
+			
+			
+			<h2 id="Decrypt">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L276">Decrypt</a>
+				<a class="permalink" href="#Decrypt">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Decrypt(secret []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, ciphertext []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+			<p>Decrypt decrypts a ciphertext using the secret with the AES block cipher algo.
+
+			
+			
+
+		
+			
+			
+			<h2 id="Encrypt">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L252">Encrypt</a>
+				<a class="permalink" href="#Encrypt">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Encrypt(secret []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, data []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+			<p>Encrypt encrypts a plaintext using the secret with the AES block cipher algo.
+
+			
+			
+
+		
+			
+			
+			<h2 id="GenerateSecret">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L226">GenerateSecret</a>
+				<a class="permalink" href="#GenerateSecret">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func GenerateSecret(pw, salt []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+			<p>GenerateSecret generates a 32-bytes secret by creating a SHA-256
+hash of a salted password using a random salt of 8-bytes. If a non-empty
+salt is provided, it is expected to be of 8-bytes length.
+It returns the 32-bytes secret and an 8-bytes salt.
+
+			
+			
+
+		
+			
+			
+			<h2 id="MustGenerateIdentity">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L305">MustGenerateIdentity</a>
+				<a class="permalink" href="#MustGenerateIdentity">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func MustGenerateIdentity(idFile <a href="https://pkg.go.dev/builtin/#string">string</a>, pw []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (<a href="https://pkg.go.dev/builtin/#string">string</a>, <a href="https://pkg.go.dev/builtin/#string">string</a>)</pre>
+			<p>MustGenerateIdentity generates a new ed25519 private key and saves it to
+the provided idFile file. A password pw is used to encrypt the private key.
+8 bytes are added in front of the ciphertext which consist of a random salt.
+The created identity file contains a base64-encoded AES ciphertext prefixed
+with a random salt of 8 bytes.
+This function will panic if any errors occur.
+
+			
+			
+
+		
+			
+			
+			<h2 id="MustGenerateSecret">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L352">MustGenerateSecret</a>
+				<a class="permalink" href="#MustGenerateSecret">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func MustGenerateSecret(pw, salt []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, []<a href="https://pkg.go.dev/builtin/#byte">byte</a>)</pre>
+			<p>MustGenerateSecret generates a 32-bytes secret with salt or panics.
+This function will panic if any errors occur.
+
+			
+			
+
+		
+			
+			
+			<h2 id="NewIdentity">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L75">NewIdentity</a>
+				<a class="permalink" href="#NewIdentity">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func NewIdentity(file <a href="https://pkg.go.dev/builtin/#string">string</a>, pw []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) *identityFile</pre>
+			<p>NewIdentity creates a new identityFile instance
+
+			
+			
+
+		
+			
+			
+			<h2 id="PubKeyToProto">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L162">PubKeyToProto</a>
+				<a class="permalink" href="#PubKeyToProto">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func PubKeyToProto(pubKey <a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/">crypto</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/#PubKey">PubKey</a>) <a href="https://pkg.go.dev/github.com/cometbft/cometbft/api/cometbft/crypto/v1/">cmtp2p</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/api/cometbft/crypto/v1/#PublicKey">PublicKey</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="SignData">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L14">SignData</a>
+				<a class="permalink" href="#SignData">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func SignData(priv <a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/">ed25519</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/#PrivKey">PrivKey</a>, tx <a href="#Signable">Signable</a>) []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+			<p>SignData signs a transaction using a private key.
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="IdentitySecretProvider">type <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L42">IdentitySecretProvider</a>
+				<a class="permalink" href="#IdentitySecretProvider">&#xb6;</a>
+				
+				
+			</h2>
+			<p>IdentitySecretProvider describes a provider that returns an AES-256 secret
+which is used to encrypt the database.
+
+			<pre>type IdentitySecretProvider interface {
+    <span class="comment">// Secret returns the 32-bytes secret used for encryption of data.</span>
+    <span class="comment">// This is the secret used to encrypt the contents of the database.</span>
+    Secret() ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+
+    <span class="comment">// PrivKey returns a ed25519 private key instance.</span>
+    PrivKey() (<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/">ed25519</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/#PrivKey">PrivKey</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+
+    <span class="comment">// PubKey returns a ed25519 public key from the private key.</span>
+    PubKey() (<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/">crypto</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/#PubKey">PubKey</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="SecretProvider">type <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L22">SecretProvider</a>
+				<a class="permalink" href="#SecretProvider">&#xb6;</a>
+				
+				
+			</h2>
+			<p>SecretProvider describes a provider that returns an AES-256 secret which
+is used to encrypt an ed25519 identity (private key).
+
+			<pre>type SecretProvider interface {
+    <span class="comment">// Bytes returns the raw bytes of a secret provider which include the random</span>
+    <span class="comment">// salt (8 bytes) used for encryption and the private key (64 bytes)</span>
+    <span class="comment">// Note: This function does not decrypt the AES encrypted private key.</span>
+    Bytes() ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+
+    <span class="comment">// Open returns the bytes of the private key (64-bytes)</span>
+    <span class="comment">// This method shall decrypt the AES encrypted private key.</span>
+    Open() ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+
+    <span class="comment">// Secret returns the 32-bytes secret used for encryption of the private key.</span>
+    <span class="comment">// This is the secret used to encrypt the contents of an identity file.</span>
+    Secret() ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+
+    <span class="comment">// Identity returns a ed25519 identity which is used to encrypt the database.</span>
+    Identity() <a href="#IdentitySecretProvider">IdentitySecretProvider</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Signable">type <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L8">Signable</a>
+				<a class="permalink" href="#Signable">&#xb6;</a>
+				
+				
+			</h2>
+			<p>Signable describes data that can be signed using a private key.
+
+			<pre>type Signable interface {
+    Sign(<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/">ed25519</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/#PrivKey">PrivKey</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)
+    Bytes() []<a href="https://pkg.go.dev/builtin/#byte">byte</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="SignedTransaction">type <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L29">SignedTransaction</a>
+				<a class="permalink" href="#SignedTransaction">&#xb6;</a>
+				
+				
+			</h2>
+			<p>SignedTransaction describes a signed data object that includes
+an owner public key, a SHA-256 hash, a size, a signature and a
+timestamp.
+
+			<pre>type SignedTransaction struct {
+<span id="SignedTransaction.Signer"></span>    Signer    <a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/">ed25519</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/#PubKey">PubKey</a>
+<span id="SignedTransaction.Hash"></span>    Hash      []<a href="https://pkg.go.dev/builtin/#byte">byte</a>
+<span id="SignedTransaction.Signature"></span>    Signature []<a href="https://pkg.go.dev/builtin/#byte">byte</a>
+<span id="SignedTransaction.Size"></span>    Size      <a href="https://pkg.go.dev/builtin/#int">int</a>
+<span id="SignedTransaction.Time"></span>    Time      <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>
+<span id="SignedTransaction.Data"></span>    Data      <a href="#TransactionBody">TransactionBody</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="FromBytes">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L152">FromBytes</a>
+					<a class="permalink" href="#FromBytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func FromBytes(bz []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (*<a href="#SignedTransaction">SignedTransaction</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>FromBytes takes a bytes slice and returns the SignedTransaction
+
+				
+				
+			
+				
+				<h3 id="FromProto">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L130">FromProto</a>
+					<a class="permalink" href="#FromProto">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func FromProto(pb *<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/">vfsp2p</a>.<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/#Transaction">Transaction</a>) (*<a href="#SignedTransaction">SignedTransaction</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>FromProto takes a transaction proto message and returns the SignedTransaction.
+
+				
+				
+			
+				
+				<h3 id="NewSignedTransactionFromBytes">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L43">NewSignedTransactionFromBytes</a>
+					<a class="permalink" href="#NewSignedTransactionFromBytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewSignedTransactionFromBytes(tx []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (*<a href="#SignedTransaction">SignedTransaction</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>NewSignedTransaction expects a signed data payload which contains
+an owner public key (32 bytes), a signature (64 bytes), a timestamp
+and at least 1 byte of arbitrary data.
+TODO: TBI verification of timestamp (too far in future, etc.)
+TODO: TBI when to verify signatures (careful with CheckTx)
+
+				
+				
+			
+
+			
+				
+				<h3 id="SignedTransaction.Bytes">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L71">Bytes</a>
+					<a class="permalink" href="#SignedTransaction.Bytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p <a href="#SignedTransaction">SignedTransaction</a>) Bytes() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				<p>Bytes returns a byte slice built from the size-prefixed
+data and the signature.
+
+				
+				
+				
+			
+				
+				<h3 id="SignedTransaction.PublicKey">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L65">PublicKey</a>
+					<a class="permalink" href="#SignedTransaction.PublicKey">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p <a href="#SignedTransaction">SignedTransaction</a>) PublicKey() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
+				<p>PublicKey returns the uppercase hexadecimal representation
+of the signer public key.
+
+				
+				
+				
+			
+				
+				<h3 id="SignedTransaction.ToProto">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L82">ToProto</a>
+					<a class="permalink" href="#SignedTransaction.ToProto">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p <a href="#SignedTransaction">SignedTransaction</a>) ToProto() *<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/">vfsp2p</a>.<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/#Transaction">Transaction</a></pre>
+				<p>ToProto returns a protobuf transaction object.
+
+				
+				
+				
+			
+				
+				<h3 id="SignedTransaction.Verify">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L59">Verify</a>
+					<a class="permalink" href="#SignedTransaction.Verify">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p <a href="#SignedTransaction">SignedTransaction</a>) Verify() <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
+				<p>Verify returns a boolean that determines the validity of a signature.
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="State">type <a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html#L21">State</a>
+				<a class="permalink" href="#State">&#xb6;</a>
+				
+				
+			</h2>
+			<p>State describes the vstore application state which consists of a latest
+blockchain height, a total number of transactions and cryptographic
+commitments about transaction data (merkle roots).
+
+			<pre>type State struct {
+
+<span id="State.NumTransactions"></span>    <span class="comment">// NumTransactions is essentially the total number of transactions processed.</span>
+    <span class="comment">// This is used for the appHash in combination with the merkle roots</span>
+    NumTransactions <a href="https://pkg.go.dev/builtin/#int64">int64</a> `json:&#34;num_transactions&#34;`
+<span id="State.Height"></span>    Height          <a href="https://pkg.go.dev/builtin/#int64">int64</a> `json:&#34;height&#34;`
+
+<span id="State.MerkleRoots"></span>    <span class="comment">// MerkleRoots contains the cryptographic commitments for transactions that</span>
+    <span class="comment">// have previously been processed.</span>
+    <span class="comment">// This is used for the appHash.</span>
+    MerkleRoots map[<a href="https://pkg.go.dev/builtin/#string">string</a>][]<a href="https://pkg.go.dev/builtin/#byte">byte</a> `json:&#34;merkle_roots&#34;`
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="State.Hash">func (State) <a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html#L66">Hash</a>
+					<a class="permalink" href="#State.Hash">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#State">State</a>) Hash() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				<p>Hash returns the hash of the application state. This is computed as the merkle
+root of all the committed transaction hashes using a deterministic merkle root
+slices as produced with MerkleRoots().
+The produced hash can be used to verify the integrity of the State.
+This function is used as the &quot;AppHash&quot;
+
+				
+				
+				
+			
+				
+				<h3 id="State.SortedMerkleRoots">func (State) <a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html#L37">SortedMerkleRoots</a>
+					<a class="permalink" href="#State.SortedMerkleRoots">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#State">State</a>) SortedMerkleRoots() [][]<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				<p>MerkleRoots returns a slice of merkle roots that is *deterministic* due to
+keys always being sorted lexicographically.
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="TransactionBody">type <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L24">TransactionBody</a>
+				<a class="permalink" href="#TransactionBody">&#xb6;</a>
+				
+				
+			</h2>
+			<p>TransactionBody represents *unsigned* data.
+
+			<pre>type TransactionBody []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="TransactionBody.Bytes">func (TransactionBody) <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L44">Bytes</a>
+					<a class="permalink" href="#TransactionBody.Bytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p <a href="#TransactionBody">TransactionBody</a>) Bytes() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
+				<p>Bytes returns a byte representation of unsigned data.
+Bytes implements Signable
+
+				
+				
+				
+			
+				
+				<h3 id="TransactionBody.Sign">func (TransactionBody) <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L32">Sign</a>
+					<a class="permalink" href="#TransactionBody.Sign">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (p <a href="#TransactionBody">TransactionBody</a>) Sign(priv <a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/">ed25519</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/crypto/ed25519/#PrivKey">PrivKey</a>) ([]<a href="https://pkg.go.dev/builtin/#byte">byte</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>Sign creates a digital signature of the bytes using the private
+key implementation for ed25519. Only ed25519 compatibility is added
+for now because of being able to batch verify ed25519 signatures.
+Sign implements Signable
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="VStoreApplication">type <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L28">VStoreApplication</a>
+				<a class="permalink" href="#VStoreApplication">&#xb6;</a>
+				
+				
+			</h2>
+			<p>VStoreApplication describes the vStore ABCI application.
+
+			<pre>type VStoreApplication struct {
+    <a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#BaseApplication">BaseApplication</a>
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewInMemoryVStoreApplication">func <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L67">NewInMemoryVStoreApplication</a>
+					<a class="permalink" href="#NewInMemoryVStoreApplication">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewInMemoryVStoreApplication(
+    id_file <a href="https://pkg.go.dev/builtin/#string">string</a>,
+    password []<a href="https://pkg.go.dev/builtin/#byte">byte</a>,
+) *<a href="#VStoreApplication">VStoreApplication</a></pre>
+				<p>NewInMemoryApplication creates a new application from an in memory database.
+NOTE: the data will not be persisted.
+
+				
+				
+			
+				
+				<h3 id="NewVStoreApplication">func <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L40">NewVStoreApplication</a>
+					<a class="permalink" href="#NewVStoreApplication">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewVStoreApplication(
+    db <a href="https://pkg.go.dev/github.com/cometbft/cometbft-db/">cmtdb</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft-db/#DB">DB</a>,
+    id_file <a href="https://pkg.go.dev/builtin/#string">string</a>,
+    password []<a href="https://pkg.go.dev/builtin/#byte">byte</a>,
+) *<a href="#VStoreApplication">VStoreApplication</a></pre>
+				<p>NewVStoreApplication creates a vfs application using a DB to load the State
+and an ed25519 identity to encrypt/decrypt database entities.
+
+				
+				
+			
+
+			
+				
+				<h3 id="VStoreApplication.CheckTx">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L329">CheckTx</a>
+					<a class="permalink" href="#VStoreApplication.CheckTx">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) CheckTx(
+    _ <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    check *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestCheckTx">RequestCheckTx</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseCheckTx">ResponseCheckTx</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>CheckTx handles inbound transactions or in the case of re-CheckTx assesses old
+transaction validity after a state transition happened.
+It is preferable to keep the checks as stateless and as quick as possible.
+For the vfs application, we check that each transaction has a valid tx format:
+- Must not be empty
+- Must contain at least the owner pubkey (32 bytes) and a signature (64 bytes)
+- Must contain at least 1 byte of arbitrary data
+CheckTx implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.Commit">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L408">Commit</a>
+					<a class="permalink" href="#VStoreApplication.Commit">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) Commit(
+    _ <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    commit *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestCommit">RequestCommit</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseCommit">ResponseCommit</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>Commit is called after FinalizeBlock and after the CometBFT state updates.
+The vfs application persists the staged data (from FinalizeBlock) in database
+in a modified key-value store where the key is the tx hash, and where
+values describe marshalled protobuf instances of vfsp2p.Transaction.
+Commit implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.FinalizeBlock">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L382">FinalizeBlock</a>
+					<a class="permalink" href="#VStoreApplication.FinalizeBlock">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) FinalizeBlock(
+    ctx <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    req *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestFinalizeBlock">RequestFinalizeBlock</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseFinalizeBlock">ResponseFinalizeBlock</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>FinalizeBlock executes the block against the application state. Transactions
+are processed one-by-one and are cached in memory. They will be persisted
+when Commit is called.
+ConsensusParams are never changed.
+FinalizeBlock implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.Info">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L288">Info</a>
+					<a class="permalink" href="#VStoreApplication.Info">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) Info(
+    _ <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    info *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestInfo">RequestInfo</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseInfo">ResponseInfo</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>Info returns information about the State of the application. This is used
+everytime a CometBFT instance begins and forwards its version to the application.
+Based on this information, CometBFT will ensure synchronicity with the application
+by potentially replaying some blocks.
+If the application returns a 0 LastBlockHeight, CometBFT will call InitChain.
+Info implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.InitChain">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L311">InitChain</a>
+					<a class="permalink" href="#VStoreApplication.InitChain">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) InitChain(
+    _ <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    chain *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestInitChain">RequestInitChain</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseInitChain">ResponseInitChain</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>InitChain returns the application hash in case the application starts with
+values pre-populated. This method is called whenever a new instance of the
+application is started, i.e. when LastBlockHeight is 0.
+InitChain implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.PrepareProposal">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L341">PrepareProposal</a>
+					<a class="permalink" href="#VStoreApplication.PrepareProposal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) PrepareProposal(
+    ctx <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    proposal *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestPrepareProposal">RequestPrepareProposal</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponsePrepareProposal">ResponsePrepareProposal</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>PrepareProposal is called only when the node is a proposer. CometBFT stages
+a set of transactions for the application.
+NOTE: we assume that CometBFT won&apos;t provide too many transactions for 1 block.
+PrepareProposal implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.ProcessProposal">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L364">ProcessProposal</a>
+					<a class="permalink" href="#VStoreApplication.ProcessProposal">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) ProcessProposal(
+    ctx <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    proposal *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestProcessProposal">RequestProcessProposal</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseProcessProposal">ResponseProcessProposal</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>ProcessProposal is called whenever a node receives a complete proposal and allows
+the application to validate the proposal.
+Only validators from the validator set will have this method called.
+ProcessProposal implements abci.Application
+
+				
+				
+				
+			
+				
+				<h3 id="VStoreApplication.Query">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L458">Query</a>
+					<a class="permalink" href="#VStoreApplication.Query">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (app *<a href="#VStoreApplication">VStoreApplication</a>) Query(
+    _ <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>,
+    req *<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#RequestQuery">RequestQuery</a>,
+) (*<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/">abci</a>.<a href="https://pkg.go.dev/github.com/cometbft/cometbft/abci/types/#ResponseQuery">ResponseQuery</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<p>Query returns an associated value or nil if missing.
+Expects a transaction hash in the request&apos;s Data field.
+Query implements abci.Application
+
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.22.3.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>

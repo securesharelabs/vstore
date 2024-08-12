@@ -1,0 +1,115 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/securesharelabs/vstore/vfs/tx_body.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.22.3";</script>
+<script src="/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/vfs">vfs</a>/<span class="text-muted">tx_body.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/vfs">github.com/securesharelabs/vstore/vfs</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package vfs
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;github.com/cometbft/cometbft/crypto/ed25519&#34;
+<span id="L5" class="ln">     5  </span>)
+<span id="L6" class="ln">     6  </span>
+<span id="L7" class="ln">     7  </span><span class="comment">// Signable describes data that can be signed using a private key.</span>
+<span id="L8" class="ln">     8  </span>type Signable interface {
+<span id="L9" class="ln">     9  </span>	Sign(ed25519.PrivKey) ([]byte, error)
+<span id="L10" class="ln">    10  </span>	Bytes() []byte
+<span id="L11" class="ln">    11  </span>}
+<span id="L12" class="ln">    12  </span>
+<span id="L13" class="ln">    13  </span><span class="comment">// SignData signs a transaction using a private key.</span>
+<span id="L14" class="ln">    14  </span>func SignData(priv ed25519.PrivKey, tx Signable) []byte {
+<span id="L15" class="ln">    15  </span>	sig, err := tx.Sign(priv)
+<span id="L16" class="ln">    16  </span>	if err != nil {
+<span id="L17" class="ln">    17  </span>		panic(err)
+<span id="L18" class="ln">    18  </span>	}
+<span id="L19" class="ln">    19  </span>
+<span id="L20" class="ln">    20  </span>	return sig
+<span id="L21" class="ln">    21  </span>}
+<span id="L22" class="ln">    22  </span>
+<span id="L23" class="ln">    23  </span><span class="comment">// TransactionBody represents *unsigned* data.</span>
+<span id="L24" class="ln">    24  </span>type TransactionBody []byte
+<span id="L25" class="ln">    25  </span>
+<span id="L26" class="ln">    26  </span>var _ Signable = (*TransactionBody)(nil)
+<span id="L27" class="ln">    27  </span>
+<span id="L28" class="ln">    28  </span><span class="comment">// Sign creates a digital signature of the bytes using the private</span>
+<span id="L29" class="ln">    29  </span><span class="comment">// key implementation for ed25519. Only ed25519 compatibility is added</span>
+<span id="L30" class="ln">    30  </span><span class="comment">// for now because of being able to batch verify ed25519 signatures.</span>
+<span id="L31" class="ln">    31  </span><span class="comment">// Sign implements Signable</span>
+<span id="L32" class="ln">    32  </span>func (p TransactionBody) Sign(priv ed25519.PrivKey) ([]byte, error) {
+<span id="L33" class="ln">    33  </span>	<span class="comment">// Sign data using the private key</span>
+<span id="L34" class="ln">    34  </span>	sig, err := priv.Sign(p)
+<span id="L35" class="ln">    35  </span>	if err != nil {
+<span id="L36" class="ln">    36  </span>		return []byte{}, err
+<span id="L37" class="ln">    37  </span>	}
+<span id="L38" class="ln">    38  </span>
+<span id="L39" class="ln">    39  </span>	return sig, nil
+<span id="L40" class="ln">    40  </span>}
+<span id="L41" class="ln">    41  </span>
+<span id="L42" class="ln">    42  </span><span class="comment">// Bytes returns a byte representation of unsigned data.</span>
+<span id="L43" class="ln">    43  </span><span class="comment">// Bytes implements Signable</span>
+<span id="L44" class="ln">    44  </span>func (p TransactionBody) Bytes() []byte {
+<span id="L45" class="ln">    45  </span>	return []byte(p)
+<span id="L46" class="ln">    46  </span>}
+<span id="L47" class="ln">    47  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.22.3.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>
