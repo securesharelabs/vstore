@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 
-  <title>vfs - GoPages</title>
+  <title>vfs - vStore/vfs v0.1.0-alpha.3</title>
 
-<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css">
+<link type="text/css" rel="stylesheet" href="https://vfs.zone/lib/godoc/style.css">
 
 <script>window.initFuncs = [];</script>
-<script src="/lib/godoc/jquery.js" defer></script>
+<script src="https://vfs.zone/lib/godoc/jquery.js" defer></script>
 
 
 
 
 <script>var goVersion = "go1.22.3";</script>
-<script src="/lib/godoc/godocs.js" defer></script>
+<script src="https://vfs.zone/lib/godoc/godocs.js" defer></script>
 
 </head>
 <body>
@@ -26,8 +26,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/">vStore/vfs v0.1.0-alpha.3 | Reference documentation</a></div>
+<div class="top-heading" id="heading-narrow"><a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/">vStore/vfs v0.1.0-alpha.3</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
@@ -101,6 +101,13 @@ protocol which is based on digital signatures with ed25519 elliptic-curve.
 <li><a href="#State">State</a>: Consists of a blockchain height, a number of transactions and merkle roots.
 <li><a href="#VStoreApplication">VStoreApplication</a>: A CometBFT ABCI application to run on top of CometBFT nodes.
 </ul>
+<h3 id="hdr-Examples">Examples</h3>
+<pre>vstore --home=/tmp/.vfs-home --socket=unix://vfs.sock
+vstore version
+vstore info --home=/tmp/.vfs-home
+vstore factory --home /tmp/.vfs-home --data &quot;Message here&quot; --commit
+vstore query --home /tmp/.vfs-home --hash TRANSACTION_HASH_HEX
+</pre>
 
 				
 			</div>
@@ -258,19 +265,19 @@ protocol which is based on digital signatures with ed25519 elliptic-curve.
 			<p>
 			<span style="font-size:90%">
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html">crypto.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html">crypto.go</a>
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/doc.go.html">doc.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/doc.go.html">doc.go</a>
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/opcode.go.html">opcode.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/opcode.go.html">opcode.go</a>
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html">state.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/state.go.html">state.go</a>
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html">tx.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html">tx.go</a>
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html">tx_body.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html">tx_body.go</a>
 			
-				<a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html">vfs.go</a>
+				<a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html">vfs.go</a>
 			
 			</span>
 			</p>
@@ -305,7 +312,7 @@ protocol which is based on digital signatures with ed25519 elliptic-curve.
 		
 			
 			
-			<h2 id="ComputeHash">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L112">ComputeHash</a>
+			<h2 id="ComputeHash">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L112">ComputeHash</a>
 				<a class="permalink" href="#ComputeHash">&#xb6;</a>
 				
 				
@@ -321,7 +328,7 @@ followed by the data and the attached timestamp bytes.
 		
 			
 			
-			<h2 id="Decrypt">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L276">Decrypt</a>
+			<h2 id="Decrypt">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L276">Decrypt</a>
 				<a class="permalink" href="#Decrypt">&#xb6;</a>
 				
 				
@@ -335,7 +342,7 @@ followed by the data and the attached timestamp bytes.
 		
 			
 			
-			<h2 id="Encrypt">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L252">Encrypt</a>
+			<h2 id="Encrypt">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L252">Encrypt</a>
 				<a class="permalink" href="#Encrypt">&#xb6;</a>
 				
 				
@@ -349,7 +356,7 @@ followed by the data and the attached timestamp bytes.
 		
 			
 			
-			<h2 id="GenerateSecret">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L226">GenerateSecret</a>
+			<h2 id="GenerateSecret">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L226">GenerateSecret</a>
 				<a class="permalink" href="#GenerateSecret">&#xb6;</a>
 				
 				
@@ -366,7 +373,7 @@ It returns the 32-bytes secret and an 8-bytes salt.
 		
 			
 			
-			<h2 id="MustGenerateIdentity">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L305">MustGenerateIdentity</a>
+			<h2 id="MustGenerateIdentity">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L305">MustGenerateIdentity</a>
 				<a class="permalink" href="#MustGenerateIdentity">&#xb6;</a>
 				
 				
@@ -385,7 +392,7 @@ This function will panic if any errors occur.
 		
 			
 			
-			<h2 id="MustGenerateSecret">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L352">MustGenerateSecret</a>
+			<h2 id="MustGenerateSecret">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L352">MustGenerateSecret</a>
 				<a class="permalink" href="#MustGenerateSecret">&#xb6;</a>
 				
 				
@@ -400,7 +407,7 @@ This function will panic if any errors occur.
 		
 			
 			
-			<h2 id="NewIdentity">func <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L75">NewIdentity</a>
+			<h2 id="NewIdentity">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L75">NewIdentity</a>
 				<a class="permalink" href="#NewIdentity">&#xb6;</a>
 				
 				
@@ -414,7 +421,7 @@ This function will panic if any errors occur.
 		
 			
 			
-			<h2 id="PubKeyToProto">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L162">PubKeyToProto</a>
+			<h2 id="PubKeyToProto">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L162">PubKeyToProto</a>
 				<a class="permalink" href="#PubKeyToProto">&#xb6;</a>
 				
 				
@@ -427,7 +434,7 @@ This function will panic if any errors occur.
 		
 			
 			
-			<h2 id="SignData">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L14">SignData</a>
+			<h2 id="SignData">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L14">SignData</a>
 				<a class="permalink" href="#SignData">&#xb6;</a>
 				
 				
@@ -442,7 +449,7 @@ This function will panic if any errors occur.
 		
 			
 			
-			<h2 id="IdentitySecretProvider">type <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L42">IdentitySecretProvider</a>
+			<h2 id="IdentitySecretProvider">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L42">IdentitySecretProvider</a>
 				<a class="permalink" href="#IdentitySecretProvider">&#xb6;</a>
 				
 				
@@ -476,7 +483,7 @@ which is used to encrypt the database.
 		
 			
 			
-			<h2 id="SecretProvider">type <a href="/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L22">SecretProvider</a>
+			<h2 id="SecretProvider">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/crypto.go.html#L22">SecretProvider</a>
 				<a class="permalink" href="#SecretProvider">&#xb6;</a>
 				
 				
@@ -516,7 +523,7 @@ is used to encrypt an ed25519 identity (private key).
 		
 			
 			
-			<h2 id="Signable">type <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L8">Signable</a>
+			<h2 id="Signable">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L8">Signable</a>
 				<a class="permalink" href="#Signable">&#xb6;</a>
 				
 				
@@ -542,7 +549,7 @@ is used to encrypt an ed25519 identity (private key).
 		
 			
 			
-			<h2 id="SignedTransaction">type <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L29">SignedTransaction</a>
+			<h2 id="SignedTransaction">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L29">SignedTransaction</a>
 				<a class="permalink" href="#SignedTransaction">&#xb6;</a>
 				
 				
@@ -571,7 +578,7 @@ timestamp.
 
 			
 				
-				<h3 id="FromBytes">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L152">FromBytes</a>
+				<h3 id="FromBytes">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L152">FromBytes</a>
 					<a class="permalink" href="#FromBytes">&#xb6;</a>
 					
 					
@@ -583,19 +590,19 @@ timestamp.
 				
 			
 				
-				<h3 id="FromProto">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L130">FromProto</a>
+				<h3 id="FromProto">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L130">FromProto</a>
 					<a class="permalink" href="#FromProto">&#xb6;</a>
 					
 					
 				</h3>
-				<pre>func FromProto(pb *<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/">vfsp2p</a>.<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/#Transaction">Transaction</a>) (*<a href="#SignedTransaction">SignedTransaction</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
+				<pre>func FromProto(pb *<a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/api/vstore/v1/">vfsp2p</a>.<a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/api/vstore/v1/#Transaction">Transaction</a>) (*<a href="#SignedTransaction">SignedTransaction</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>FromProto takes a transaction proto message and returns the SignedTransaction.
 
 				
 				
 			
 				
-				<h3 id="NewSignedTransactionFromBytes">func <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L43">NewSignedTransactionFromBytes</a>
+				<h3 id="NewSignedTransactionFromBytes">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L43">NewSignedTransactionFromBytes</a>
 					<a class="permalink" href="#NewSignedTransactionFromBytes">&#xb6;</a>
 					
 					
@@ -613,7 +620,7 @@ TODO: TBI when to verify signatures (careful with CheckTx)
 
 			
 				
-				<h3 id="SignedTransaction.Bytes">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L71">Bytes</a>
+				<h3 id="SignedTransaction.Bytes">func (SignedTransaction) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L71">Bytes</a>
 					<a class="permalink" href="#SignedTransaction.Bytes">&#xb6;</a>
 					
 					
@@ -627,7 +634,7 @@ data and the signature.
 				
 			
 				
-				<h3 id="SignedTransaction.PublicKey">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L65">PublicKey</a>
+				<h3 id="SignedTransaction.PublicKey">func (SignedTransaction) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L65">PublicKey</a>
 					<a class="permalink" href="#SignedTransaction.PublicKey">&#xb6;</a>
 					
 					
@@ -641,12 +648,12 @@ of the signer public key.
 				
 			
 				
-				<h3 id="SignedTransaction.ToProto">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L82">ToProto</a>
+				<h3 id="SignedTransaction.ToProto">func (SignedTransaction) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L82">ToProto</a>
 					<a class="permalink" href="#SignedTransaction.ToProto">&#xb6;</a>
 					
 					
 				</h3>
-				<pre>func (p <a href="#SignedTransaction">SignedTransaction</a>) ToProto() *<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/">vfsp2p</a>.<a href="/pkg/github.com/securesharelabs/vstore/api/vstore/v1/#Transaction">Transaction</a></pre>
+				<pre>func (p <a href="#SignedTransaction">SignedTransaction</a>) ToProto() *<a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/api/vstore/v1/">vfsp2p</a>.<a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/api/vstore/v1/#Transaction">Transaction</a></pre>
 				<p>ToProto returns a protobuf transaction object.
 
 				
@@ -654,7 +661,7 @@ of the signer public key.
 				
 			
 				
-				<h3 id="SignedTransaction.Verify">func (SignedTransaction) <a href="/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L59">Verify</a>
+				<h3 id="SignedTransaction.Verify">func (SignedTransaction) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx.go.html#L59">Verify</a>
 					<a class="permalink" href="#SignedTransaction.Verify">&#xb6;</a>
 					
 					
@@ -669,7 +676,7 @@ of the signer public key.
 		
 			
 			
-			<h2 id="State">type <a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html#L21">State</a>
+			<h2 id="State">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/state.go.html#L21">State</a>
 				<a class="permalink" href="#State">&#xb6;</a>
 				
 				
@@ -705,7 +712,7 @@ commitments about transaction data (merkle roots).
 
 			
 				
-				<h3 id="State.Hash">func (State) <a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html#L66">Hash</a>
+				<h3 id="State.Hash">func (State) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/state.go.html#L66">Hash</a>
 					<a class="permalink" href="#State.Hash">&#xb6;</a>
 					
 					
@@ -722,7 +729,7 @@ This function is used as the &quot;AppHash&quot;
 				
 			
 				
-				<h3 id="State.SortedMerkleRoots">func (State) <a href="/src/github.com/securesharelabs/vstore/vfs/state.go.html#L37">SortedMerkleRoots</a>
+				<h3 id="State.SortedMerkleRoots">func (State) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/state.go.html#L37">SortedMerkleRoots</a>
 					<a class="permalink" href="#State.SortedMerkleRoots">&#xb6;</a>
 					
 					
@@ -738,7 +745,7 @@ keys always being sorted lexicographically.
 		
 			
 			
-			<h2 id="TransactionBody">type <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L24">TransactionBody</a>
+			<h2 id="TransactionBody">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L24">TransactionBody</a>
 				<a class="permalink" href="#TransactionBody">&#xb6;</a>
 				
 				
@@ -759,7 +766,7 @@ keys always being sorted lexicographically.
 
 			
 				
-				<h3 id="TransactionBody.Bytes">func (TransactionBody) <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L44">Bytes</a>
+				<h3 id="TransactionBody.Bytes">func (TransactionBody) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L44">Bytes</a>
 					<a class="permalink" href="#TransactionBody.Bytes">&#xb6;</a>
 					
 					
@@ -773,7 +780,7 @@ Bytes implements Signable
 				
 			
 				
-				<h3 id="TransactionBody.Sign">func (TransactionBody) <a href="/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L32">Sign</a>
+				<h3 id="TransactionBody.Sign">func (TransactionBody) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/tx_body.go.html#L32">Sign</a>
 					<a class="permalink" href="#TransactionBody.Sign">&#xb6;</a>
 					
 					
@@ -791,7 +798,7 @@ Sign implements Signable
 		
 			
 			
-			<h2 id="VStoreApplication">type <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L28">VStoreApplication</a>
+			<h2 id="VStoreApplication">type <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L28">VStoreApplication</a>
 				<a class="permalink" href="#VStoreApplication">&#xb6;</a>
 				
 				
@@ -814,7 +821,7 @@ Sign implements Signable
 
 			
 				
-				<h3 id="NewInMemoryVStoreApplication">func <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L67">NewInMemoryVStoreApplication</a>
+				<h3 id="NewInMemoryVStoreApplication">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L67">NewInMemoryVStoreApplication</a>
 					<a class="permalink" href="#NewInMemoryVStoreApplication">&#xb6;</a>
 					
 					
@@ -830,7 +837,7 @@ NOTE: the data will not be persisted.
 				
 			
 				
-				<h3 id="NewVStoreApplication">func <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L40">NewVStoreApplication</a>
+				<h3 id="NewVStoreApplication">func <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L40">NewVStoreApplication</a>
 					<a class="permalink" href="#NewVStoreApplication">&#xb6;</a>
 					
 					
@@ -849,7 +856,7 @@ and an ed25519 identity to encrypt/decrypt database entities.
 
 			
 				
-				<h3 id="VStoreApplication.CheckTx">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L329">CheckTx</a>
+				<h3 id="VStoreApplication.CheckTx">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L329">CheckTx</a>
 					<a class="permalink" href="#VStoreApplication.CheckTx">&#xb6;</a>
 					
 					
@@ -872,7 +879,7 @@ CheckTx implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.Commit">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L408">Commit</a>
+				<h3 id="VStoreApplication.Commit">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L408">Commit</a>
 					<a class="permalink" href="#VStoreApplication.Commit">&#xb6;</a>
 					
 					
@@ -892,7 +899,7 @@ Commit implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.FinalizeBlock">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L382">FinalizeBlock</a>
+				<h3 id="VStoreApplication.FinalizeBlock">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L382">FinalizeBlock</a>
 					<a class="permalink" href="#VStoreApplication.FinalizeBlock">&#xb6;</a>
 					
 					
@@ -912,7 +919,7 @@ FinalizeBlock implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.Info">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L288">Info</a>
+				<h3 id="VStoreApplication.Info">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L288">Info</a>
 					<a class="permalink" href="#VStoreApplication.Info">&#xb6;</a>
 					
 					
@@ -933,7 +940,7 @@ Info implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.InitChain">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L311">InitChain</a>
+				<h3 id="VStoreApplication.InitChain">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L311">InitChain</a>
 					<a class="permalink" href="#VStoreApplication.InitChain">&#xb6;</a>
 					
 					
@@ -952,7 +959,7 @@ InitChain implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.PrepareProposal">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L341">PrepareProposal</a>
+				<h3 id="VStoreApplication.PrepareProposal">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L341">PrepareProposal</a>
 					<a class="permalink" href="#VStoreApplication.PrepareProposal">&#xb6;</a>
 					
 					
@@ -971,7 +978,7 @@ PrepareProposal implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.ProcessProposal">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L364">ProcessProposal</a>
+				<h3 id="VStoreApplication.ProcessProposal">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L364">ProcessProposal</a>
 					<a class="permalink" href="#VStoreApplication.ProcessProposal">&#xb6;</a>
 					
 					
@@ -990,7 +997,7 @@ ProcessProposal implements abci.Application
 				
 			
 				
-				<h3 id="VStoreApplication.Query">func (*VStoreApplication) <a href="/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L458">Query</a>
+				<h3 id="VStoreApplication.Query">func (*VStoreApplication) <a href="./https:/vfs.zone/src/github.com/securesharelabs/vstore/vfs/vfs.go.html#L458">Query</a>
 					<a class="permalink" href="#VStoreApplication.Query">&#xb6;</a>
 					
 					

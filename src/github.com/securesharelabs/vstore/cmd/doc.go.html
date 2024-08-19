@@ -3,18 +3,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="theme-color" content="#375EAB"/>
 
-  <title>src/github.com/securesharelabs/vstore/cmd/doc.go - GoPages</title>
+  <title>src/github.com/securesharelabs/vstore/cmd/doc.go - vStore/vfs v0.1.0-alpha.3</title>
 
-<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css"/>
+<link type="text/css" rel="stylesheet" href="https://vfs.zone/lib/godoc/style.css"/>
 
 <script>window.initFuncs = [];</script>
-<script src="/lib/godoc/jquery.js" defer=""></script>
+<script src="https://vfs.zone/lib/godoc/jquery.js" defer=""></script>
 
 
 
 
 <script>var goVersion = "go1.22.3";</script>
-<script src="/lib/godoc/godocs.js" defer=""></script>
+<script src="https://vfs.zone/lib/godoc/godocs.js" defer=""></script>
 
 </head>
 <body>
@@ -24,8 +24,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/">vStore/vfs v0.1.0-alpha.3 | Reference documentation</a></div>
+<div class="top-heading" id="heading-narrow"><a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/">vStore/vfs v0.1.0-alpha.3</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
 
 </div></div>
@@ -38,7 +38,7 @@
 
   <h1>
     Source file
-    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/securesharelabs">securesharelabs</a>/<a href="/src/github.com/securesharelabs/vstore">vstore</a>/<a href="/src/github.com/securesharelabs/vstore/cmd">cmd</a>/<span class="text-muted">doc.go</span>
+    <a href="https:/vfs.zone/src">src</a>/<a href="https:/vfs.zone/src/github.com">github.com</a>/<a href="https:/vfs.zone/src/github.com/securesharelabs">securesharelabs</a>/<a href="https:/vfs.zone/src/github.com/securesharelabs/vstore">vstore</a>/<a href="https:/vfs.zone/src/github.com/securesharelabs/vstore/cmd">cmd</a>/<span class="text-muted">doc.go</span>
   </h1>
 
 
@@ -46,7 +46,7 @@
 
 
   <h2>
-    Documentation: <a href="/pkg/github.com/securesharelabs/vstore/cmd">github.com/securesharelabs/vstore/cmd</a>
+    Documentation: <a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/cmd">github.com/securesharelabs/vstore/cmd</a>
   </h2>
 
 
@@ -68,9 +68,17 @@
 <span id="L11" class="ln">    11  </span>  - `vstore version`: Print the version number of your vStore instance.
 <span id="L12" class="ln">    12  </span>  - `vstore info`: Print the current node&#39;s vStore information (State).
 <span id="L13" class="ln">    13  </span>  - `vstore query`: Query your vStore instance for transactions.
-<span id="L14" class="ln">    14  </span>*/</span>
-<span id="L15" class="ln">    15  </span>package cmd
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span># Examples
 <span id="L16" class="ln">    16  </span>
+<span id="L17" class="ln">    17  </span>	vstore --home=/tmp/.vfs-home --socket=unix://vfs.sock
+<span id="L18" class="ln">    18  </span>	vstore version
+<span id="L19" class="ln">    19  </span>	vstore info --home=/tmp/.vfs-home
+<span id="L20" class="ln">    20  </span>	vstore factory --home /tmp/.vfs-home --data &#34;Message here&#34; --commit
+<span id="L21" class="ln">    21  </span>	vstore query --home /tmp/.vfs-home --hash TRANSACTION_HASH_HEX
+<span id="L22" class="ln">    22  </span>*/</span>
+<span id="L23" class="ln">    23  </span>package cmd
+<span id="L24" class="ln">    24  </span>
 </pre><p></p>
 
 <div id="footer">

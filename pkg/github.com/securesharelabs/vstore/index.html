@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 
-  <title>vstore - GoPages</title>
+  <title>vstore - vStore/vfs v0.1.0-alpha.3</title>
 
-<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css">
+<link type="text/css" rel="stylesheet" href="https://vfs.zone/lib/godoc/style.css">
 
 <script>window.initFuncs = [];</script>
-<script src="/lib/godoc/jquery.js" defer></script>
+<script src="https://vfs.zone/lib/godoc/jquery.js" defer></script>
 
 
 
 
 <script>var goVersion = "go1.22.3";</script>
-<script src="/lib/godoc/godocs.js" defer></script>
+<script src="https://vfs.zone/lib/godoc/godocs.js" defer></script>
 
 </head>
 <body>
@@ -26,8 +26,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/pkg/github.com/securesharelabs/vstore/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/">vStore/vfs v0.1.0-alpha.3 | Reference documentation</a></div>
+<div class="top-heading" id="heading-narrow"><a href="https:/vfs.zone/pkg/github.com/securesharelabs/vstore/">vStore/vfs v0.1.0-alpha.3</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
@@ -39,7 +39,7 @@
 
 
   <h1>
-    Package vstore
+    Command vstore
     <span class="text-muted"></span>
   </h1>
 
@@ -71,36 +71,18 @@
 
 	
 		
-		<div id="short-nav">
-			<dl>
-			<dd><code>import "github.com/securesharelabs/vstore"</code></dd>
-			</dl>
-			<dl>
-			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
-			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
-			
-			
-				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
-			
-			</dl>
-		</div>
-		<!-- The package's Name is printed as title by the top-level template -->
-		<div id="pkg-overview" class="toggleVisible">
-			<div class="collapsed">
-				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
-			</div>
-			<div class="expanded">
-				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>Package vstore implements a verifiable store for CometBFT nodes.
-<p>vStore is a Go application built using Cosmos SDK. It focusses on providing:
+		<p>Package vstore implements a verifiable store for CometBFT nodes.
+<h3 id="hdr-Motivation">Motivation</h3>
+<p>vStore is a Go application built using <a href="https://github.com/cometbft/cometbft">CometBFT</a>. It focusses on providing:
 <ul>
 <li>data integrity: attaching timestamp and signature information to data ; and
 <li>data redundancy: running a vstore application on top of CometBFT nodes ; and
 <li>data availability: data is available from any supporting CometBFT nodes ; and
 <li>data security: the blockchain is *not* used to store your data!
 </ul>
-<p>vStore is built using cobra: github.com/spf13/cobra
-By default, the main function runs the vstoreCmd from `cmd/vstore.go`.
+<p>vStore is built using the <a href="https://github.com/spf13/cobra">cobra</a> command-line utility software.
+<p>By default, the main function runs the vstoreCmd from `cmd/vstore.go` which starts
+a vStore instance and asks the user for a password to decrypt the node identity.
 <h3 id="hdr-Examples">Examples</h3>
 <pre>vstore --home=/tmp/.vfs-home --socket=unix://vfs.sock
 vstore version
@@ -108,68 +90,15 @@ vstore info --home=/tmp/.vfs-home
 vstore factory --home /tmp/.vfs-home --data &quot;Message here&quot; --commit
 vstore query --home /tmp/.vfs-home --hash TRANSACTION_HASH_HEX
 </pre>
-<h3 id="hdr-Subcommands">Subcommands</h3>
+<h3 id="hdr-Commands">Commands</h3>
 <ul>
-<li>`vstore`: Default vStore application startup (ABCI server).
+<li>`vstore`: Default vStore application startup (ABCI application server).
 <li>`vstore factory`: Create digitally signed transactions for vfs nodes.
 <li>`vstore version`: Print the version number of your vStore instance.
 <li>`vstore info`: Print the current node&apos;s vStore information (State).
 <li>`vstore query`: Query your vStore instance for transactions.
 </ul>
-<h3 id="hdr-Disclaimer">Disclaimer</h3>
-<p>The authors of this package cannot be held responsible for any loss of money or
-any malintentioned- or harmful- usage forms of this package. Please use this
-package with caution.
-<h3 id="hdr-Licensing">Licensing</h3>
-<p>Copyright vStore Authors
-Copyright 2024 SecureShareLabs (<a href="https://vfs.zone">https://vfs.zone</a>)
-<p>vStore © 2024 by SecureShareLabs is licensed under CC BY-SA 4.0.
 
-				
-			</div>
-		</div>
-
-		<div id="pkg-index" class="toggleVisible">
-		<div class="collapsed">
-			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
-		</div>
-		<div class="expanded">
-			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
-
-		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
-			<div id="manual-nav">
-			<dl>
-			
-			
-			
-			
-			
-			</dl>
-			</div><!-- #manual-nav -->
-
-		
-
-		
-			<h3>Package files</h3>
-			<p>
-			<span style="font-size:90%">
-			
-				<a href="/src/github.com/securesharelabs/vstore/doc.go.html">doc.go</a>
-			
-				<a href="/src/github.com/securesharelabs/vstore/main.go.html">main.go</a>
-			
-			</span>
-			</p>
-		
-		</div><!-- .expanded -->
-		</div><!-- #pkg-index -->
-
-		
-
-		
-		
-		
-		
 	
 
 	
