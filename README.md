@@ -1,5 +1,10 @@
 # vStore: verifiable store
 
+![Version](https://img.shields.io/github/v/tag/securesharelabs/vstore?label=version)
+![Go version](https://img.shields.io/github/go-mod/go-version/securesharelabs/vstore)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)][issues]
+[![Website](https://img.shields.io/badge/https://-vfs.zone-blue)][vfs]
+
 **vStore** is a Go application built using Cosmos SDK. It focusses on providing:
 
 - *data integrity*: attaching timestamp and signature information to data ; and
@@ -12,6 +17,13 @@ alongside data sets to ensure that they are untouched and always verifiable.
 
 This software implements a first draft of **vfs** as an integral part of the vstore
 application, this may change in the future.
+
+## Usage
+
+A reference documentation is deployed at [https://vfs.zone][vfs].
+
+Usage documentation can be found in this document or in the `cmd` package documentation
+which also lists some examples [here][usage].
 
 ## Install
 
@@ -78,5 +90,6 @@ Copyright 2024 SecureShareLabs (https://vfs.zone)
 [vStore][vfs] © 2024 by SecureShareLabs is licensed under [CC BY-SA 4.0][license-url].
 
 [vfs]: https://vfs.zone
-[spec]: ./docs/spec/README.md
+[usage]: https://vfs.zone/pkg/github.com/securesharelabs/vstore/cmd/
+[issues]: https://github.com/securesharelabs/vstore/issues
 [license-url]: https://creativecommons.org/licenses/by-sa/4.0/

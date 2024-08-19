@@ -1,4 +1,4 @@
-package vstore
+package main
 
 import (
 	"github.com/securesharelabs/vstore/cmd"
