@@ -76,6 +76,17 @@ go build
 go test github.com/securesharelabs/vstore/vfs -v -count=1
 ```
 
+## Reference documentation
+
+You can generate the reference documentation locally using `github.com/johnstarich/go/gopages`.
+
+Install `gopages` using `go install -u github.com/johnstarich/go/gopages`. Then generate the
+static reference documentation in a `docs` folder using the following command:
+
+```bash
+gopages -out docs/
+```
+
 ## Disclaimer
 
 The authors of this package cannot be held responsible for any loss of money or
